@@ -1,0 +1,583 @@
+/* Poppins and Outfit */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Poppins:wght@500;600;700&display=swap');
+/* roboto slab*/
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100..900&display=swap');
+/* Anton, League Spartan, Bebas Neue */
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=League+Spartan:wght@100..900&display=swap');
+/* Patrick Hand, Inter */
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Patrick+Hand&display=swap');
+
+:root {
+    --orange: #ff6200;
+    --dark-gray: #1c1d1e;
+    --white: #ffffff;
+}
+  
+
+/* Estado inicial */
+.animate-fade-left,
+.animate-fade-in {
+  opacity: 0;
+  transform: translateY(20px); /* por defecto, movimiento vertical */
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.animate-fade-left {
+  transform: translateX(-60px); /* movimiento horizontal desde la izquierda */
+}
+
+/* Clase cuando entra en pantalla */
+.visible {
+  opacity: 1;
+  transform: translateX(0) translateY(0);
+}
+
+.animate-fade-in h2 {
+    transition-delay: 1s;
+}
+
+.animate-fade-left:nth-child(2) {
+    transition-delay: 1s;
+}
+
+.animate-fade-left:nth-child(3) {
+    transition-delay: 3s;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+  
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+body {
+    background-color:white;
+}
+
+
+h1,
+h2,
+h3 {
+    font-family: 'Poppins', sans-serif;
+}
+
+a {
+    display: inline;
+    color: inherit;
+    text-decoration: underline;
+    white-space: normal;
+    break-inside: avoid;
+}
+
+img {
+    width: 100%;
+    height: 100%;
+    position:absolute;
+    z-index: 100;
+}
+
+
+body,
+p,
+span,
+li {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 400;
+}
+
+.nav {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    align-items: center;
+    padding: 0.9rem;
+    transition: opacity 200ms ease, transform 200ms ease;
+    color: black;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color:#ff6200;
+    justify-content: space-between;
+    overflow: hidden;
+}
+
+.nav * {
+    color:#1c1d1e;
+    font-family: 'Poppins', sans-serif;
+    letter-spacing: 0.5px;
+    font-size: large;
+    text-decoration: none;
+    overflow: hidden;
+}
+
+.nav-home a {
+    display: flex;
+    font-weight: bold;
+    transition: color 0.3s ease, opacity 0.3s ease, background-color  0.3s ease;
+    padding: 8px;
+    border-radius: 15px;
+}
+
+.nav-home a:hover {
+    color: black;
+    background-color: #e65a00;
+}
+
+.nav-right {
+    display: flex;
+    position: fixed;
+    right: 0;
+    width: 30%;
+    align-items: center;
+    padding: 1.3rem;
+    color: black;
+    z-index: 1000;
+    justify-content: space-around;
+}
+
+.nav.hidden {
+    transform: translateY(-100%);
+}
+
+.nav-right a {
+    display: flex;
+    align-items: center;
+    height: 2rem;
+    position: relative;
+    text-decoration: none;
+    transition: color 0.3s ease, opacity 0.3s ease;
+}
+
+.nav-div {
+    height: 4rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.nav-right a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0; /* ligeramente debajo del texto */
+    width: 0;
+    height: 2px;
+    background-color: black; /* O cualquier color del underline */
+    transition: width 0.3s ease;
+}
+
+.nav-right a:hover::after {
+    width: 100%;
+    /* Se despliega el subrayado */
+}
+
+.intro-left {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    top: 5rem;
+    left: 9rem;
+    width: 40rem;
+    z-index: 1;
+}
+
+.headline {
+    font-size: 5rem;
+    font-weight: 1000;
+    width: 35rem;
+    color:#1c1d1e;
+    text-align: center;
+    overflow: hidden;
+}
+
+#intro-subheadline {
+    position: relative;
+    display: block;
+    text-align: center;
+    width: 36rem;
+    margin-top: 2.2rem;
+    font-size: 1.5rem;
+}
+
+#intro-right {
+    position: absolute;
+    top: 10vh;
+    right: 4vw;
+    width: 35vw;
+    height: 70vh;
+    border-radius: 40px;
+    overflow: hidden;
+}
+.intro-bars {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+.wave-intro {
+    display: flex;
+    flex-direction: row;
+    min-height: 100vh;
+    width: 100%;
+    background:#ff6200;
+    position: relative;
+}
+
+svg {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+
+}
+
+.tests-info-section {
+    position:relative;
+    padding: 8rem 0 3.5rem 0;
+}
+
+.div-info-tests {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    left: auto;
+    width: 55vw;
+    margin-top: auto;
+    justify-content: flex-end;
+    align-items: flex-end;
+}
+
+.div-info-tests h2 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    width: 45vw;
+}
+
+.div-info-tests p {
+    font-size: 1.3rem;
+    margin: 1rem 0;
+    width: 45vw;
+}
+
+.arrow {
+    animation: bounce 2s infinite;
+    display: flex;
+    font-size: 2rem;
+    color: black;
+    position: relative;
+    bottom: 20px;
+    left: 30%;
+    transform: translateX(-50%);
+    cursor: pointer;
+    overflow: hidden;
+    transition-delay: 4.5s;
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateX(-50%) translateY(0);
+    }
+
+    50% {
+        transform: translateX(-50%) translateY(10px);
+    }
+}
+
+.test-container {
+    margin-top: 15.8rem;
+    display: flex;
+    height: 80vh;
+}
+
+.test-panel {
+    flex: 1;
+    background-color: white;
+    color:#ff6200;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: flex 0.4s ease, background-color 0.4s ease;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    user-select: none;
+}
+
+.test-panel:hover {
+    flex: 2.5;
+    background-color: #ff6200;
+    color:white;
+}
+
+.vertical-text {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: 3.7rem;
+    font-weight: 800;
+    opacity: 0.6;
+    transition: opacity 0.3s ease;
+    font-family: 'league spartan', sans-serif;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    user-select: none;
+}
+
+.test-panel[data-title="Trigonometry"] .vertical-text {
+    letter-spacing: 3px;
+}  
+
+.test-panel:hover .vertical-text {
+    opacity: 0;
+}
+
+.panel-info {
+    position: absolute;
+    opacity: 0;
+    text-align: left;
+    padding: 1rem;
+    max-width: 90%;
+    transition: opacity 0.4s ease;
+}
+
+.test-panel:hover .panel-info {
+    opacity: 1;
+}
+
+.test-panel.selected {
+    background-color: #d4ff00 !important;
+    color: black;
+}
+
+.test-panel:nth-child(1).selected {
+    background-color: #C764C1 !important;
+}
+
+.test-panel:nth-child(2).selected {
+    background-color: #2DE1CF !important;
+}
+
+.test-panel:nth-child(3).selected {
+    background-color: #FDE74C !important;
+}
+
+.test-panel:nth-child(4).selected {
+    background-color: #FF5454 !important;
+}
+
+.submit-container {
+    margin: 2rem auto;
+    text-align: center;
+}
+
+button {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    border: none;
+    background-color: white;
+    color: black;
+    cursor: pointer;
+    border-radius: 6px;
+    opacity: 0.5;
+    pointer-events: none;
+    margin-bottom: 6rem;
+    transition: opacity 0.3s ease, transform 0.5s ease, background-color 0.3s ease, color 0.3s ease;
+
+}
+
+button.enabled {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+button.enabled:hover {
+    color: white;
+    background-color: #ff6200;
+}
+
+.test-panel:hover::after {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.section-separator {
+    position:relative;
+    display: block;
+    width: 100%;
+    height: 100px;
+    margin-bottom: -2px;
+    /* elimina pequeño salto visual */
+}
+
+.separator {
+    position:relative;
+}
+
+.separator-div {
+    position:relative;
+    width: 100vw;
+    margin: 2rem 0;
+}
+
+.progress-section {
+    width: 100vw;
+    height: 100vh;
+    background-color: white;
+}
+
+.about-me {
+    position: relative;
+    background-color: var(--orange);
+    height: 90vh;
+    width: 100vw;
+}
+
+.about-me-h1 {
+    margin-top: 2rem;
+    width: 100vw;
+}
+
+.swiper {
+    width: 100%;
+    padding: 30px 0;
+}
+
+.swiper-wrapper {
+    overflow-x:visible;
+}
+
+.swiper-slide {
+    position: relative;
+    width: 10rem;
+    height: 5rem;
+    border-radius: 14px;
+    border: 1px solid black;
+    margin: 0 2rem;
+    background-color: #1c1d1e;
+}
+
+.swiper-slide .title {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+    justify-content: center;
+    align-items: center;
+}
+
+.title span {
+    width: auto;
+    user-select: none;
+    color: #ff6200;
+    font-size: 1.5rem;
+}
+
+#question-texts {
+    display: flex;
+    position: relative;
+    right: 1%;
+    height: 3rem;
+    width: 40vw;
+}
+
+.questions-container {
+    display: flex;
+    justify-content: center;
+}
+
+.question-text {
+    display: flex;
+    justify-content: center;
+    position: absolute;
+    width: 100%;
+    top: 0;
+    left: 0%;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+}
+
+.question-text span {
+    font-family: 'Patrick Hand', sans-serif;
+    font-size: 2rem;
+}
+
+.answers-container {
+    display: flex;
+    width: 100vw;
+    height: 30vh;
+    position: relative;
+    justify-content: center;
+}
+
+.answers-box {
+    display: flex;
+    position: relative;
+    justify-content: center;
+    align-items: center;
+    width: 65vw;
+    height: 100%;
+    overflow: hidden;
+}
+
+.answer-text {
+    text-align: center;
+    align-self: center;
+    width: 90%;
+    height: auto;
+    top: auto;
+    left: auto;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+    font-family: 'Inter', sans-serif;
+}
+
+.answer-text p {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.3rem;
+}
+
+.question-text.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+footer {
+    display: flex;
+    justify-content: center;
+    gap: 5rem;
+    background-color: #1c1d1e;
+    height: 10vh;
+    width: 100vw;
+    padding: 1rem;
+}
+
+.footer-icon {
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    font-size: 2rem;
+    color: var(--orange);
+    transition: transform 0.3s ease, color 0.3s ease;
+    text-decoration: none;
+}
+
+.footer-icon i {
+    overflow: hidden;
+}
+
+.footer-icon:hover {
+    transform: scale(1.3);
+    color: #cc4e00;
+}

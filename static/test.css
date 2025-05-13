@@ -1,0 +1,349 @@
+/* Poppins and Outfit */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Poppins:wght@500;600;700&display=swap');
+/* roboto slab*/
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100..900&display=swap');
+/* Anton, League Spartan, Bebas Neue */
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=League+Spartan:wght@100..900&display=swap');
+/* Patrick Hand, Inter */
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Patrick+Hand&display=swap');
+
+:root {
+    --orange: #ff6200;
+    --dark-gray: #1c1d1e;
+    --white: #ffffff;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    height: 100%;
+}
+
+.hidden {
+    display: none;
+    width: 0;
+    height: 0;
+    padding: 0;
+    margin: 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+nav {
+    display: flex;
+    box-sizing: border-box;
+    width: 100%;
+    align-items: center;
+    height: 2.6rem;
+    flex-shrink: 0;
+    padding: 2rem 3rem;
+    transition: opacity 200ms ease, transform 200ms ease;
+    color: black;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: var(--orange);
+    justify-content: space-between;
+    overflow: hidden;
+}
+
+nav * {
+    color: #1c1d1e;
+    font-family: 'Poppins', sans-serif;
+    letter-spacing: 0.5px;
+    font-size: large;
+    text-decoration: none;
+}
+
+.nav-home button {
+    display: flex;
+    font-weight: bold;
+    transition: color 0.3s ease, opacity 0.3s ease, background-color 0.3s ease;
+    padding: 8px;
+    border-radius: 15px;
+    background-color: var(--orange);
+    border: none;
+    cursor: pointer;
+}
+
+.nav-home button:hover {
+    color: black;
+    background-color: #e65a00;
+}
+
+section {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    overflow-y: auto;
+    align-items: center;
+    width: 100%;
+    font-family: 'Inter', sans-serif;
+    font-size: 1.2rem;
+    padding: 2rem 0;
+}
+
+.exercise-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 50vw;
+}
+
+.calculator {
+    color: rgba(33, 36, 44, 0.50);
+    text-align: center;
+}
+
+.statement {
+    font-family: 'Inter', sans-serif;
+    margin-top: 1rem;
+}
+
+.equation {
+    margin-top: 1rem;
+}
+
+.image img {
+    max-width: 100%;
+    height: auto;
+    max-height: 500px;
+    display: block;
+    margin-top: 1rem;
+    object-fit: contain;
+}
+
+.question {
+    margin-top: 1rem;
+    font-weight: 600;
+}
+
+.format_hint {
+    margin-top: 0.25rem;
+    font-style: italic;
+    font-size: 1.05rem;
+    font-weight: 300;
+
+}
+
+.answer_txt {
+    margin-top: 1.5rem;
+}
+.answer-input {
+    padding: 10px 15px;
+    font-size: 1.2rem;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    width: 25%;
+    max-width: 300px;
+}
+
+.answer-input:focus {
+    border-color: var(--orange);
+    box-shadow: 0 0 0 3px rgba(255, 98, 0, 0.2);
+}
+
+.answers-instruction {
+    font-size: 1rem;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+    font-style: italic;
+}
+
+footer {
+    display: flex;
+    background-color: white;
+    justify-content: center;
+    border-top: 3px solid #ff6200;
+    box-sizing: border-box;
+    flex-shrink: 0;
+    width: 100%;
+    height: 4.5rem;
+    gap: 5rem;
+    padding: 0.5rem;
+}
+
+.nti.button {
+    padding: 0.5rem 1.5rem;
+    font-size: 1.2rem;
+    font-family: 'Poppins', sans-serif;
+}
+
+.button.skip {
+    background: none;
+    border: none;
+    color: #ff6200;
+    font-weight: bold;
+    position: relative;
+    cursor: pointer;
+    padding: 0;
+    height: auto;
+}
+
+.button.skip::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 8px;
+    width: 0;
+    height: 2px;
+    background-color: #ff6200;
+    transition: width 0.3s ease;
+}
+
+.button.skip:hover::after {
+    width: 100%;
+}
+
+.button.check {
+    background-color: #ff6200;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0.6rem 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.button.check:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 98, 0, 0.3);
+}
+
+/* Contenedor compartido */
+.option-container {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    margin-bottom: 15px;
+    background-color: white;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    position: relative;
+}
+
+.option-container:hover {
+    background-color: #f9f9f9;
+}
+
+/* Ocultar inputs originales */
+.option-container input[type="radio"],
+.option-container input[type="checkbox"] {
+    display: none;
+}
+
+/* Círculo para MC */
+.custom-radio {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+    margin-right: 15px;
+    transition: background-color 0.3s;
+}
+
+.option-container:hover .custom-radio {
+    background-color: #ffb366;
+}
+
+.option-container input[type="radio"]:checked + .custom-radio {
+    background-color: #ff6200;
+}
+
+/* Cuadrado para MA */
+.custom-checkbox {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    background-color: #e0e0e0;
+    margin-right: 15px;
+    transition: background-color 0.3s;
+    position: relative;
+}
+
+/* Tilde al seleccionar */
+.custom-checkbox::after {
+    content: "✓";
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.option-container input[type="checkbox"]:checked + .custom-checkbox::after {
+    opacity: 1;
+}
+
+.option-container:hover .custom-checkbox {
+    background-color: #ffb366;
+}
+
+.option-container input[type="checkbox"]:checked + .custom-checkbox {
+    background-color: #ff6200;
+}
+
+/* Texto respuesta */
+.answer-text {
+    font-size: 18px;
+    color: #333;
+}
+
+/* Imagen respuesta */
+.answer-img {
+    max-width: 200px;
+    max-height: 150px;
+    object-fit: contain;
+}
+
+/* FB select style */
+
+.answer-select {
+    font-size: 1.3rem;
+    text-align: center;
+    padding: 6px 12px;
+    padding-right: 2rem;
+    border: 2px solid #1c1d1e;
+    border-radius: 6px;
+    background-color: #ffffff;
+    color: #1c1d1e;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin: 0 4px;
+    appearance: none;
+    /* Limpia estilos por defecto en algunos navegadores */
+    background-image: url("data:image/svg+xml;charset=UTF-8,<svg fill='black' viewBox='0 0 140 140' xmlns='http://www.w3.org/2000/svg'><polygon points='0,0 140,0 70,90'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 10px;
+}
+
+.answer-select:focus {
+    outline: none;
+    border-color: #ff6200;
+    /* Naranja vibrante */
+    box-shadow: 0 0 5px rgba(255, 98, 0, 0.4);
+}
+
+.answer-select option {
+    background-color: #ffffff;
+    color: #1c1d1e;
+}
+
+.statement-fb {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-top: 2rem;
+}

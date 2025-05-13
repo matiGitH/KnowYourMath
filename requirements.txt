@@ -1,0 +1,7 @@
+flask
+flask-session
+supabase
+python-dotenv
+psycopg2
+requests
+numpy

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Link Swiper's CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+  {% block css %}
+    <!-- styles.css link -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+  {% endblock %}
+  {% block js %}
+    <!-- app.js link -->
+    <script defer src="{{ url_for('static', filename='app.js') }}"></script>
+  {% endblock %}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <title>KnowYourMath {% block title %}{% endblock %}</title>
+</head>
+
+<body>
+  {% block main %}
+  <nav class="nav">
+    <div class="nav-left">
+      <div class="nav-home">
+        <a href="{{ url_for('index') }}">KnowYourMath</a>
+      </div>
+    </div>
+    <div class="nav-right">
+      <div class="nav-tests nav-div">
+        <a href="#tests">Tests</a>
+      </div>
+      <div class="nav-progress nav-div">
+        <a href="#progress">Progress</a>
+      </div>
+      <div class="nav-about-me nav-div">
+        <a href="#about-me">About me</a>
+      </div>
+      <div class="nav-log nav-div">
+        {% if "user_id" in session %}
+          <a href="{{ url_for('logout') }}">Log out</a>
+        {% else %}
+          <a href="{{ url_for('login') }}">Log in</a>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+
+  <section class="intro-section">
+    <div class="wave-intro">
+      <div class="intro-left">
+        <h1 class="headline">
+          Improve your math skills
+        </h1>
+        <span id="intro-subheadline">
+          Discover your level through smart, adaptive quizzes designed to help you improve—by targeting your weak points
+          and showing you exactly what to work on.
+        </span>
+      </div>
+      <div id="intro-right">
+        <img src="https://static.vecteezy.com/system/resources/previews/024/724/633/non_2x/a-happy-smiling-young-college-student-with-a-book-in-hand-isolated-on-a-transparent-background-generative-ai-free-png.png">
+      </div>
+    </div>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+        <path fill="#fff" fill-opacity="1" d="M0,320L40,
+          293.3C80,267,160,213,240,202.7C320,192,400,224,480,234.7C560,245,640,235,720,197.3C800,160,880,96,960,64C1040,
+          32,1120,32,1200,37.3C1280,43,1360,53,1400,58.7L1440,64L1440,320L1400,320C1360,320,1280,320,1200,320C1120,320,
+          1040,320,960,320C880,320,800,320,720,320C640,320,560,320,480,320C400,320,320,320,240,320C160,320,80,320,40,
+          320L0,320Z"></path>
+      </svg>
+      <div class="intro-bars">
+        <img src="static\images/stripes-divider-large.png" alt="">
+      </div>
+  </section>
+
+  <section class="tests-info-section">
+    <div class="div-info-tests">
+      <h2 class="animate-fade-in">Take a look at our tests!</h2>
+      <p class="animate-fade-left">
+        Each quiz consists of a short set of adaptive questions. As you answer, the difficulty adjusts to reflect your 
+        current level.
+      </p>
+      <p class="animate-fade-left"> 
+        At the end, you'll receive a detailed review of your performance, including topic-by-topic 
+        feedback, personalized recommendations, and focused material to help you move forward.
+      </p>
+    </div>
+  </section>
+  <a href="#tests"><i class="fa-solid fa-chevron-down arrow animate-fade-in"></i></a>
+
+  <form class="tests-select" action="{{ url_for('index')}}" method="post">
+    <div id="tests" class="test-container">
+      <div class="test-panel" data-title="Trigonometry">
+        <div class="vertical-text">Trigonometry</div>
+        <div class="panel-info">
+          <h2>Trigonometry</h2>
+          <p>Study of angles, triangles, and trigonometric functions.</p>
+        </div>
+      </div>
+      <div class="test-panel" data-title="Statistics">
+        <div class="vertical-text">Statistics</div>
+        <div class="panel-info">
+          <h2>Statistics</h2>
+          <p>Analysis and interpretation of numerical data.</p>
+        </div>
+      </div>
+      <div class="test-panel" data-title="Algebra">
+        <div class="vertical-text">Algebra</div>
+        <div class="panel-info">
+          <h2>Algebra</h2>
+          <p>Manipulation of symbols and solving equations.</p>
+        </div>
+      </div>
+      <div class="test-panel" data-title="Calculus">
+        <div class="vertical-text">Calculus</div>
+        <div class="panel-info">
+          <h2>Calculus</h2>
+          <p>Study of change and motion through derivatives and integrals.</p>
+        </div>
+      </div>
+    </div>
+    <div class="submit-container animate-fade-in">
+      <button id="submitBtn" type="submit">Confirm</button>
+    </div>
+  </form>
+      <!-- Separador entre tests y progreso -->
+      <div class="separator-div animate-fade-in">
+        <svg class="separator" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100">
+          <path
+            d="M0 0h10v100H0zM20 0h10v100H20zM40 0h10v100H40zM60 0h10v100H60zM80 0h10v100H80zM100 0h10v100h-10zM120 0h10v100h-10zM140 0h10v100h-10zM160 0h10v100h-10zM180 0h10v100h-10zM200 0h10v100h-10zM220 0h10v100h-10zM240 0h10v100h-10zM260 0h10v100h-10zM280 0h10v100h-10zM300 0h10v100h-10zM320 0h10v100h-10zM340 0h10v100h-10zM360 0h10v100h-10zM380 0h10v100h-10zM400 0h10v100h-10zM420 0h10v100h-10zM440 0h10v100h-10zM460 0h10v100h-10zM480 0h10v100h-10zM500 0h10v100h-10zM520 0h10v100h-10zM540 0h10v100h-10zM560 0h10v100h-10zM580 0h10v100h-10zM600 0h10v100h-10zM620 0h10v100h-10zM640 0h10v100h-10zM660 0h10v100h-10zM680 0h10v100h-10zM700 0h10v100h-10zM720 0h10v100h-10zM740 0h10v100h-10zM760 0h10v100h-10zM780 0h10v100h-10zM800 0h10v100h-10zM820 0h10v100h-10zM840 0h10v100h-10zM860 0h10v100h-10zM880 0h10v100h-10zM900 0h10v100h-10zM920 0h10v100h-10zM940 0h10v100h-10zM960 0h10v100h-10zM980 0h10v100h-10z"
+            fill="#FF6200"></path>
+        </svg>
+      </div>
+      
+      <section id="progress" class="progress-section">
+        {% if not logged_in %}
+          <p>Please log in to view your progress.</p>
+
+        {% elif not has_results %}
+          <p>You will see your progress here once you complete a test.</p>
+        
+        {% else %}
+          <h2>Your Progress</h2>
+          <ul>
+            {% for result in results %}
+              <li>{{ result.test_name }}: {{ result.score }}%</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </section>
+      
+      <div class="separator-div animate-fade-in">
+        <svg class="separator" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100">
+          <path
+            d="M0 0h10v100H0zM20 0h10v100H20zM40 0h10v100H40zM60 0h10v100H60zM80 0h10v100H80zM100 0h10v100h-10zM120 0h10v100h-10zM140 0h10v100h-10zM160 0h10v100h-10zM180 0h10v100h-10zM200 0h10v100h-10zM220 0h10v100h-10zM240 0h10v100h-10zM260 0h10v100h-10zM280 0h10v100h-10zM300 0h10v100h-10zM320 0h10v100h-10zM340 0h10v100h-10zM360 0h10v100h-10zM380 0h10v100h-10zM400 0h10v100h-10zM420 0h10v100h-10zM440 0h10v100h-10zM460 0h10v100h-10zM480 0h10v100h-10zM500 0h10v100h-10zM520 0h10v100h-10zM540 0h10v100h-10zM560 0h10v100h-10zM580 0h10v100h-10zM600 0h10v100h-10zM620 0h10v100h-10zM640 0h10v100h-10zM660 0h10v100h-10zM680 0h10v100h-10zM700 0h10v100h-10zM720 0h10v100h-10zM740 0h10v100h-10zM760 0h10v100h-10zM780 0h10v100h-10zM800 0h10v100h-10zM820 0h10v100h-10zM840 0h10v100h-10zM860 0h10v100h-10zM880 0h10v100h-10zM900 0h10v100h-10zM920 0h10v100h-10zM940 0h10v100h-10zM960 0h10v100h-10zM980 0h10v100h-10z"
+            fill="#FF6200"></path>
+        </svg>
+      </div>
+      
+    <section id="about-me" class="about-me">
+      <div class="headline about-me-h1 animate-fade-in">About me</div>
+
+      <div class="swiper">
+        <div class="swiper-wrapper">
+            <div class="swiper-slide" data-question="what">
+                <div class="title">
+                    <span>What?</span>
+                </div>
+            </div>
+            <div class="swiper-slide" data-question="who">
+                <div class="title">
+                    <span>Who?</span>
+                </div>
+            </div>
+            <div class="swiper-slide" data-question="why"> 
+                <div class="title">
+                    <span>Why?</span>
+                </div>
+            </div>
+            <div class="swiper-slide" data-question="future">
+                <div class="title">
+                    <span>Future?</span>
+                </div>
+            </div>
+            <div class="swiper-slide" data-question="how">
+                <div class="title">
+                    <span>How?</span>
+                </div>
+            </div>
+        </div>
+        <!-- If we need pagination -->
+        <div class="swiper-pagination"></div>
+      </div>
+
+      <div class="questions-container">
+        <div id="question-texts">
+            <div class="question-text" data-for="what"><span>As in... "What am I looking at?"</span></div>
+            <div class="question-text" data-for="who"><span>As in... "Who's responsible for all this?"</span></div>
+            <div class="question-text" data-for="why"><span>As in... "Why did you create this?"</span></div>
+            <div class="question-text" data-for="future"><span>As in... "What's the next thing you'll do?"</span></div>
+            <div class="question-text" data-for="how"><span>As in... "How did you manage to built it?"</span></div>
+        </div>
+      </div>
+      <div class="answers-container">
+        <div class="answers-box">
+          <div class="question-text answer-text" data-for="what"> <p>This is the learning assistant I wish I had at first, when I
+            was learning math but didn't know where to find free and useful material for my level. It is ideal for anyone who'd
+            like to expand its horizonts and doesn't know where to start.</p> </div>
+          <div class="question-text answer-text" data-for="who"> <p>I am just an 18-years-old data science student who has recently finished <a target="_blank" href="https://pll.harvard.edu/course/cs50-introduction-computer-science">cs50</a> and wants to do something useful for his community, but if you want to know more about me, you can visit my <a href="www.linkedin.com/in/matias-garcea-8b3999296">LinkedIn profile</a> and see what I'm up to, or my <a href="https://www.instagram.com/mati_garcea510/">social media</a> where I post cool piano videos for a more personal view! </p> </div>
+          <div class="question-text answer-text" data-for="why"> <p>That's a question I really had to ask myself before starting
+            this project. On the one hand, I knew I had to built some final project in order to complete the <a href="https://pll.harvard.edu/course/cs50-introduction-computer-science">cs50</a>. However,
+            I knew I could pick something short and fit to my skills and knowledge, but, after some creative work, I fell in
+            love with the idea of a challenging, original and helpful project. I knew it'd take long, but I also knew it would
+            teach me a ton and it would be something I can be proud of. And here it is!</p> </div>
+          <div class="question-text answer-text" data-for="future"> <p>At the moment, I somehow can't answer at all this question. I
+            am seriously considering taking the <a href="https://www.geeksforgeeks.org/courses/data-science-live">Geeks for Geeks data science course</a> as my first formal data science course,
+            but I'm definitely open to any kind of opportunities.</p> </div>
+          <div class="question-text answer-text" data-for="how"> <p>With loads of patience, trial and error. That would definitely
+            be my short answer. I had to discover and learn tons of new tools I hadn't even heard of. Most will come handy for
+            me in the near future, and some I will never see again, the only thing that remains constant is the attitude and the
+            eagerness neccesary to accomplish great things.</p> </div>
+        </div>
+      </div>
+      
+
+    </section>
+    <footer>
+      <a href="https://linkedin.com/in/tuusuario" class="footer-icon" target="_blank"><i class="fa-brands fa-linkedin"></i></a>
+      <a href="https://instagram.com/tuusuario" class="footer-icon" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+      <a href="mailto:mati.garcea07@gmail.com" class="footer-icon"><i class="fa-solid fa-envelope"></i></a>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+  {% if data %}
+    <h1>Datos desde Supabase</h1>
+    <div>{{ data }}</div>
+  {% endif %}
+
+  {% if error %}
+    <div class="error-message">
+      {{ error }}
+    </div>
+  {% endif %}
+  {% endblock %}
+</body>
+
+</html>

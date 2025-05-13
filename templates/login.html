@@ -1,0 +1,81 @@
+{% extends "index.html" %}
+
+{% block title %}
+    Log In
+{% endblock %}
+
+{% block css %}
+    <!-- styles.css link -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+
+    <style>
+        .error-message {
+            color: black;
+            background-color: #ff6200;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-weight: bold;
+        }
+        .with-error {
+            padding-top: 2rem;
+        }
+    </style>
+{% endblock %}
+
+{% block js %}
+
+{% endblock %}
+
+{% block main %}
+    <nav class="nav">
+        <div class="nav-left">
+            <div class="nav-home">
+                <a href="{{ url_for('index') }}">KnowYourMath</a>
+            </div>
+        </div>
+        <div class="nav-right">
+            <div class="nav-tests nav-div">
+                <a href="{{ url_for('index') }}#tests">Tests</a>
+            </div>
+            <div class="nav-progress nav-div">
+                <a href="{{ url_for('index') }}#progress">Progress</a>
+            </div>
+            <div class="nav-about-me nav-div">
+                <a href="{{ url_for('index') }}#about-me">About me</a>
+            </div>
+            <div class="nav-log-in nav-div">
+                <a href="{{ url_for('register')}}">Sign up</a>
+            </div>
+        </div>
+    </nav>
+
+    <section>
+        <form action="{{ url_for('login')}}" method="post" class="register-form {% if error %} with-error {% endif %}">
+            {% if error %}
+                <div class="error-message">
+                    {{ error }}
+                </div>
+            {% endif %}
+            <input autocomplete="off" autofocus name="username" placeholder="Username" type="text">
+            
+            <input name="email" placeholder="Email" type="email">
+        
+            <button class="btn btn-primary" type="submit">Log in</button>
+            <div class="form-footer">
+                <p>Don't have an account yet? <a href="{{ url_for('register')}}">Sign up here</a></p>
+            </div>
+        </form>
+    
+        <div class="message-box">
+            <h2>Why do we ask for your information?</h2>
+            <p>
+                We use your name and email to save your progress in the tests, let you track your results over time, and improve your overall experience.
+            </p>
+            <p>
+                We don't share your data with anyone — it's only used within the platform.
+            </p>
+        </div>
+    </section>
+{% endblock %}

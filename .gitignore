@@ -1,0 +1,9 @@
+# Ignorar entorno virtual
+backend/venv/
+
+# Ignorar credenciales sensibles
+backend/.env
+
+# Archivos de caché de Python
+__pycache__/
+*.pyc

@@ -1,0 +1,80 @@
+{% extends "index.html" %}
+
+{% block title %}
+    Sign Up
+{% endblock %}
+
+{% block css %}
+    <!-- styles.css link -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+
+    <style>
+        .error-message {
+            color: black;
+            background-color: #ff6200;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .with-error {
+            padding-top: 2rem;
+        }
+    </style>
+{% endblock %}
+
+{% block js %}
+
+{% endblock %}
+
+{% block main %}
+    <nav class="nav">
+        <div class="nav-left">
+            <div class="nav-home">
+                <a href="{{ url_for('index') }}">KnowYourMath</a>
+            </div>
+        </div>
+        <div class="nav-right">
+            <div class="nav-tests nav-div">
+                <a href="{{ url_for('index') }}#tests">Tests</a>
+            </div>
+            <div class="nav-progress nav-div">
+                <a href="{{ url_for('index') }}#progress">Progress</a>
+            </div>
+            <div class="nav-about-me nav-div">
+                <a href="{{ url_for('index') }}#about-me">About me</a>
+            </div>
+            <div class="nav-log-in nav-div">
+                <a href="{{ url_for('login')}}">Log in</a>
+            </div>
+        </div>
+    </nav>
+    <section>
+        <form action="/register" method="post" class="register-form {% if error %} with-error {% endif %}">
+            {% if error %}
+                <div class="error-message">
+                    {{ error }}
+                </div>
+            {% endif %}
+            <input autocomplete="username" autofocus name="username" placeholder="Username" type="text">
+            
+            <input autocomplete="email" name="email" placeholder="Email" type="email">
+
+            <label for="birth-date">Birth date</label>
+            <input autocomplete="bday" id="birth-date" name="birth-date" placeholder="Birth Date" type="date">
+        
+            <button type="submit">Sign up</button> 
+        </form>
+        <div class="message-box">
+            <h2>Why do we ask for your information?</h2>
+            <p>
+                We use your name and email to save your progress in the tests, let you track your results over time, and improve your overall experience.
+            </p>
+            <p>
+                We don't share your data with anyone — it's only used within the platform.
+            </p>
+        </div>
+    </section>
+{% endblock %}

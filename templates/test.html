@@ -1,0 +1,157 @@
+{% extends "index.html" %}
+
+{% block title %}
+    Test
+{% endblock %}
+
+{% block css %}
+    <!-- styles.css link -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='test.css') }}">
+{% endblock %}
+
+{% block js %}
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)']],
+                displayMath: [['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+{% endblock %}
+
+{% block main %}
+    <nav class="nav">
+            <div class="nav-home">
+                <form id="exit" action="/exit-test" method="post"></form>
+                <input form="exit" type="hidden">
+                <button form="exit">KnowYourMath</button>
+            </div>
+            <div class="nav-session">
+                <a href="">{{ username }}</a>
+            </div>
+        </div>
+    </nav>
+    <section>
+        <div class="exercise-container">
+            
+            {% if type == "nti" or type == "mc" or type == "ma" %}
+                {% if calculator %}
+                    <div class="calculator"> You may use: Calculator </div>
+                {% endif %}
+
+                {% if statement %}
+                    <div class="statement"> {{ statement | safe }} </div>
+                {% endif %}
+
+                {% if equation %}
+                    <div class="equation"> {{ equation | safe }} </div>
+                {% endif %}
+
+                {% if image_url %}
+                    <div class="image">
+                        <img src="{{ image_url }} " alt="">
+                    </div>
+                {% endif %}
+
+                {% if question %}
+                    <div class="question"> {{ question | safe }} </div>
+                {% endif %}
+
+                {% if type == "nti" %}
+
+                    {% if format_hint %}
+                        <div class="format_hint"> {{ format_hint | safe }} </div>
+                    {% endif %}
+
+                    <form id="answer_form" method="POST" action="/test"></form>
+                    <input form="answer_form" type="hidden" name="action" value="check">
+                    <div class="answer_txt"> {{ answer_txt | safe }} </div>
+
+
+
+                {% elif type == "mc" %}
+                    <div class="answers-instruction">
+                        Choose 1 answer:
+                    </div>
+                    <form id="answer_form" method="post" action="/test">
+                        <input type="hidden" name="action" value="check">
+                    {% for ans in answers %}
+                        <label class="option-container">
+                        <input type="radio" name="answer" value="{{ ans.answer}}">
+                        <span class="custom-radio"></span>
+
+                        {% if ans.type == 'text' %}
+                            <span class="answer-text">{{ ans.answer | safe }}</span>
+                        {% elif ans.type == 'img' %}
+                            <img src="{{ ans.answer }}" alt="Answer Image" class="answer-img">
+                        {% endif %}
+                        </label>
+                    {% endfor %}    
+                    </form>
+                
+                {% elif type == "ma" %}
+                    
+                    <div class="answer-instruction">
+                        Choose all that apply:
+                    </div>
+                    <form id="answer_form" method="post" action="/test">
+                        <input type="hidden" name="action" value="check_ma">
+                    {% for ans in answers %}
+                        <label class="option-container">
+                        <input type="checkbox" name="answer" value="{{ ans.answer }}">
+                        <span class="custom-checkbox"></span>
+                        
+                        {% if ans.type == 'text' %}
+                            <span class="answer-text">{{ ans.answer }}</span>
+                        {% elif ans.type == 'img' %}
+                            <img src="{{ ans.answer }}" alt="Answer Image" class="answer-img">
+                        {% endif %}
+                        </label>
+                    {% endfor %}
+                    </form>
+
+                {% endif %}
+                
+                
+            {% elif type == "fb" %}
+                {% if calculator %}
+                    <div class="calculator"> You may use: Calculator </div>
+                {% endif %}
+
+                {% if equation %}
+                    <div class="equation"> {{ equation | safe }} </div>
+                {% endif %}
+
+                {% if image_url %}
+                    <div class="image">
+                        <img src="{{ image_url }} " alt="">
+                    </div>
+                {% endif %}
+
+                <form id="answer_form" method="post">
+                    <input type="hidden" name="action" value="check">
+                    <div class="statement-fb">
+                      {{ statement_fb | safe }}
+                    </div>
+                  </form>
+            {% endif %}
+        </div>
+        <p>{{ question_id }}</p>
+        <p>{{ question_level }}</p>
+    </section>
+    <footer>
+        <form id="skip" action="/test" method="post"></form>
+        <input form="skip" type="hidden" name="action" value="skip">
+        <button form="skip" class="nti button skip">
+            Skip
+        </button>
+        <button form="answer_form" class="nti button check">
+            Check
+        </button>
+    </footer>
+{% endblock %}
