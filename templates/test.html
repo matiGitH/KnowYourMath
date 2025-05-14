@@ -10,7 +10,10 @@
 {% endblock %}
 
 {% block js %}
+    <!-- app.js link -->
+    <script defer src="{{ url_for('static', filename='test.js') }}"></script>
     <script>
+        console.log("aca no tamo un choto chelo")
         window.MathJax = {
             tex: {
                 inlineMath: [['\\(', '\\)']],
@@ -36,6 +39,18 @@
             </div>
         </div>
     </nav>
+    <!-- Alerta personalizada -->
+    <div id="customAlert" class="overlay hidden">
+        <div class="alert-box">
+            <h3>Are you sure?</h3>
+            <p>This will count as a wrong answer.</p>
+            <form method="post" action="/test">
+                <input type="hidden" name="action" value="skip">
+                <button type="submit" class="confirm">Yes, skip</button>
+                <button type="button" class="cancel" id="cancelSkip">Cancel</button>
+            </form>
+        </div>
+    </div>
     <section>
         <div class="exercise-container">
             
@@ -145,9 +160,9 @@
         <p>{{ question_level }}</p>
     </section>
     <footer>
-        <form id="skip" action="/test" method="post"></form>
-        <input form="skip" type="hidden" name="action" value="skip">
-        <button form="skip" class="nti button skip">
+        <!-- <form id="skip" action="/test" method="post"></form>
+        <input form="skip" type="hidden" name="action" value="skip"> -->
+        <button id="skipBtn" class="nti button skip">
             Skip
         </button>
         <button form="answer_form" class="nti button check">
