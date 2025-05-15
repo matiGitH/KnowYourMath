@@ -207,36 +207,16 @@ def register():
         return render_template("register.html")
     
 
-@app.route("/test", methods=["GET", "POST"])
-def test():
-    if request.method == "POST":
-        action = request.form.get("action")
+@app.route("/check", methods=["GET", "POST"])
+def check():
+    action = request.form.get("action")
+    if action == "check":
+        result = validate_nti_mc_fb(request.form.get("answer"), session["question_id"])
 
-        if action == "skip":
-            
-            print(f"pregunta a responder de nivel {session["question_level"]}")
-            # Update beliefs based on failure (skip)
-            session[f"{session["question_category"]}_beliefs"] = update_beliefs(False, session["question_level"], session[f"{session["question_category"]}_beliefs"])
-            
-            # Update user_answers
-            cur, conn = connect_db()
+    elif action == "check_ma":
+        result = validate_ma(request.form.getlist("answer"), session["question_id"])
 
-            cur.execute("INSERT INTO user_answers (question_id, is_correct, test_id) VALUES (%s, %s, %s);", (session["question_id"], False, session[f"{session["question_category"]}_test_id"]))
-            conn.commit()
-
-            close_db(cur, conn)
-
-            session["question_id"] = 0
-
-            result = None
-        
-        elif action == "check":
-            result = validate_nti_mc_fb(request.form.get("answer"), session["question_id"])
-
-        elif action == "check_ma":
-            result = validate_ma(request.form.getlist("answer"), session["question_id"])
-        
-        if result:
+    if result:
             print("CORRECTO!!")
             cur, conn = connect_db()
 
@@ -246,41 +226,84 @@ def test():
             close_db(cur, conn)
             session[f"{session["question_category"]}_beliefs"] = update_beliefs(True, session["question_level"], session[f"{session["question_category"]}_beliefs"])
 
-        elif result == False:
-            print("INCORRECTO!!")
+    else:
+        print("INCORRECTO!!")
 
-            cur, conn = connect_db()
-            cur.execute("INSERT INTO user_answers (question_id, is_correct, test_id) VALUES (%s, %s, %s);", (session["question_id"], False, session[f"{session["question_category"]}_test_id"]))
-            conn.commit()
-            close_db(cur, conn)
-            session[f"{session["question_category"]}_beliefs"] = update_beliefs(False, session["question_level"], session[f"{session["question_category"]}_beliefs"])
+        cur, conn = connect_db()
+        cur.execute("INSERT INTO user_answers (question_id, is_correct, test_id) VALUES (%s, %s, %s);", (session["question_id"], False, session[f"{session["question_category"]}_test_id"]))
+        conn.commit()
+        close_db(cur, conn)
+        session[f"{session["question_category"]}_beliefs"] = update_beliefs(False, session["question_level"], session[f"{session["question_category"]}_beliefs"])
 
-        # Check if breaking point found
-        breaking_point = find_breaking_point(session[f"{session["question_category"]}_beliefs"])
+    # Check if breaking point found
+    breaking_point = find_breaking_point(session[f"{session["question_category"]}_beliefs"])
 
         # Save category's final level and remove finished test
-        if breaking_point:
-            session[f"{session["question_category"]}_final_level"] = breaking_point
-            session["tests"].remove(session["question_category"])
+    if breaking_point:
+        session[f"{session["question_category"]}_final_level"] = breaking_point
+        session["tests"].remove(session["question_category"])
 
-            # Add to session finished tests and update tests (completed)
-            session["finished_tests"].append(session["question_category"])
+        # Add to session finished tests and update tests (completed)
+        session["finished_tests"].append(session["question_category"])
 
-            print(f"user id = {session["user_id"]}")
-            print(f"category_id = {session[f"{session["question_category"]}_test_id"]}")
-            cur, conn = connect_db()
-            cur.execute("UPDATE tests SET completed = %s WHERE user_id = %s AND id = %s;", (True, session["user_id"], session[f"{session["question_category"]}_test_id"],))
-            conn.commit()
-            close_db(cur, conn)
+        print(f"user id = {session["user_id"]}")
+        print(f"category_id = {session[f"{session["question_category"]}_test_id"]}")
+        cur, conn = connect_db()
+        cur.execute("UPDATE tests SET completed = %s WHERE user_id = %s AND id = %s;", (True, session["user_id"], session[f"{session["question_category"]}_test_id"],))
+        conn.commit()
+        close_db(cur, conn)
 
-            # Check if any tests left
-            if session["tests"] == []:
-                return redirect(url_for("test_final"))
+        # Check if any tests left
+        if session["tests"] == []:
+            return redirect(url_for("test_final"))
         
-        session["question_id"] = 0
-        return redirect(url_for("test"))
+    session["question_id"] = 0
+    return redirect(url_for("test"))
 
+@app.route("/skip", methods=["GET", "POST"])
+def skip():
+    print(f"pregunta a responder de nivel {session["question_level"]}")
+    # Update beliefs based on failure (skip)
+    session[f"{session["question_category"]}_beliefs"] = update_beliefs(False, session["question_level"], session[f"{session["question_category"]}_beliefs"])
     
+    # Update user_answers
+    cur, conn = connect_db()
+
+    cur.execute("INSERT INTO user_answers (question_id, is_correct, test_id) VALUES (%s, %s, %s);", (session["question_id"], False, session[f"{session["question_category"]}_test_id"]))
+    conn.commit()
+
+    close_db(cur, conn)
+
+    session["question_id"] = 0
+
+    # Check if breaking point found
+    breaking_point = find_breaking_point(session[f"{session["question_category"]}_beliefs"])
+
+    if breaking_point:
+        session[f"{session["question_category"]}_final_level"] = breaking_point
+        session["tests"].remove(session["question_category"])
+
+        # Add to session finished tests and update tests (completed)
+        session["finished_tests"].append(session["question_category"])
+
+        print(f"user id = {session["user_id"]}")
+        print(f"category_id = {session[f"{session["question_category"]}_test_id"]}")
+        cur, conn = connect_db()
+        cur.execute("UPDATE tests SET completed = %s WHERE user_id = %s AND id = %s;", (True, session["user_id"], session[f"{session["question_category"]}_test_id"],))
+        conn.commit()
+        close_db(cur, conn)
+
+        # Check if any tests left
+        if session["tests"] == []:
+            return redirect(url_for("test_final"))
+        
+    session["question_id"] = 0
+    return redirect(url_for("test"))
+        
+
+
+@app.route("/test", methods=["GET"])
+def test():    
     if request.method == "GET":
 
         cur, conn = connect_db()
@@ -302,12 +325,8 @@ def test():
             session["used_levels"].append(chosen_lvl)
 
             # Select random question from chosen level
-            cur, conn = connect_db()
-
             cur.execute("SELECT questions.id, questions.level, questions.statement, questions.equation, questions.question, questions.image_url, questions.format_hint, questions.answer_txt, questions.calculator, categories.name AS category_name, question_types.name AS type_name FROM questions JOIN categories ON questions.category_id = categories.id JOIN question_types ON questions.type_id = question_types.id WHERE questions.level = %s AND categories.name = %s ORDER BY RANDOM() LIMIT 1;", (chosen_lvl, random_category,)) 
             question = cur.fetchone()
-
-            close_db(cur, conn)
 
             session["question_id"] = question["id"]
             session["question_category"] = question["category_name"]
@@ -317,7 +336,8 @@ def test():
             if question['type_name'] == "nti":
 
                 answer_txt = question['answer_txt'].replace("__", "<input form='answer_form' type='text' name='answer' class='answer-input'>")
-
+                
+                close_db(cur, conn)
                 return render_template("test.html",
                                     question_id=session["question_id"],
                                     question_level = session["question_level"],
@@ -334,12 +354,8 @@ def test():
             
             elif question["type_name"] == "mc" or question["type_name"] == "ma":
 
-                cur, conn = connect_db()
-
                 cur.execute("SELECT answer FROM answers WHERE question_id = %s", (session["question_id"],)) 
                 answers = cur.fetchall()
-
-                close_db(cur, conn)
 
                 r.shuffle(answers)
                 for answer in answers:
@@ -347,7 +363,8 @@ def test():
                         answer["type"] = "text"
                     else:
                         answer["type"] = "img"
-
+                
+                close_db(cur, conn)
                 return render_template("test.html",
                                     question_id=session["question_id"],
                                     question_level = session["question_level"],
@@ -363,12 +380,9 @@ def test():
             
             
             elif question["type_name"] == "fb":
-                cur, conn = connect_db()
 
                 cur.execute("SELECT answer FROM answers WHERE question_id = %s", (session["question_id"],)) 
                 answers = cur.fetchall()  # [{'answer': 'sides'}, {'answer': 'angles'}, ...]
-
-                close_db(cur, conn)
 
                 r.shuffle(answers)  # Mezclar las opciones
 
@@ -382,6 +396,7 @@ def test():
                 # Reemplazar "__" en el statement por el <select>
                 statement_fb = question["statement"].replace("__", select_html)
 
+                close_db(cur, conn)
                 return render_template("test.html",
                                     question_id=session["question_id"],
                                     question_level = session["question_level"],
@@ -397,7 +412,6 @@ def test():
 
         else:
             # Return same question using question ID
-            cur, conn = connect_db()
             cur.execute("SELECT questions.id, questions.level, questions.statement, questions.equation, questions.question, questions.image_url, questions.format_hint, questions.answer_txt, questions.calculator, categories.name AS category_name, question_types.name AS type_name FROM questions JOIN categories ON questions.category_id = categories.id JOIN question_types ON questions.type_id = question_types.id WHERE questions.id = %s;", (session["question_id"],)) 
             question = cur.fetchone()
             if question["type_name"] == "mc" or question["type_name"] == "ma" or question["type_name"] == "fb":
@@ -410,11 +424,13 @@ def test():
                     else:
                         answer["type"] = "img"
                         
-            close_db(cur, conn)
             if question["type_name"] == "nti":
                 answer_txt = question['answer_txt'].replace("__", "<input form='answer_form' type='text' name='answer' class='answer-input'>")
-            
+
+                close_db(cur, conn)
                 return render_template("test.html",
+                                    question_id=session["question_id"],
+                                    question_level = session["question_level"],
                                     username=session["username"],
                                     level=question['level'],
                                     statement=question['statement'],
@@ -428,8 +444,10 @@ def test():
                                     )
 
             if question["type_name"] == "mc" or question["type_name"] == "ma":
+                close_db(cur, conn)
                 return render_template("test.html",
                                     question_id=session["question_id"],
+                                    question_level = session["question_level"],
                                     username=session["username"],
                                     level=question['level'],
                                     statement=question['statement'],
@@ -453,8 +471,10 @@ def test():
                 # Reemplazar "__" en el statement por el <select>
                 statement_fb = question["statement"].replace("__", select_html)
 
+                close_db(cur, conn)
                 return render_template("test.html",
                                     question_id=session["question_id"],
+                                    question_level = session["question_level"],
                                     username=session["username"],
                                     level=question['level'],
                                     statement_fb=statement_fb,

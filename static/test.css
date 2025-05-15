@@ -355,31 +355,47 @@ footer {
 }
 
 .alert-box {
-  background-color: #1c1d1e;
-  color: white;
-  padding: 2rem;
-  border-radius: 12px;
-  text-align: center;
-  width: 300px;
-  box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    background-color: var(--orange);
+    color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    text-align: center;
+    height: 35vh;
+    width: 30vw;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    font-size: 1.1rem;
+    font-family: 'Poppins', sans-serif;
 }
 
 .alert-box button {
-  margin: 0.5rem;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  border: none;
+    margin: 0.5rem;
+    padding: 0.8rem 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    border: none;
+    font-size: 1rem;
+    font-family: 'Poppins', sans-serif;
 }
 
 .confirm {
-  background-color: #dc3545;
-  color: white;
+    background-color: var(--dark-gray);
+    color: var(--orange);
+}
+
+.confirm:hover {
+    color: white;
 }
 
 .cancel {
-  background-color: #6c757d;
-  color: white;
+    background-color: var(--dark-gray);
+    color: var(--orange);
+}
+
+.cancel:hover {
+    color: white;
 }
 
 .hidden {

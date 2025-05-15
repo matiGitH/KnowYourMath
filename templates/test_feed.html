@@ -44,7 +44,8 @@
         <div class="alert-box">
             <h3>Are you sure?</h3>
             <p>This will count as a wrong answer.</p>
-            <form method="post" action="/skip">
+            <form method="post" action="/test">
+                <input type="hidden" name="action" value="skip">
                 <button type="submit" class="confirm">Yes, skip</button>
                 <button type="button" class="cancel" id="cancelSkip">Cancel</button>
             </form>
@@ -82,7 +83,7 @@
                         <div class="format_hint"> {{ format_hint | safe }} </div>
                     {% endif %}
 
-                    <form id="answer_form" method="POST" action="/check"></form>
+                    <form id="answer_form" method="POST" action="/test"></form>
                     <input form="answer_form" type="hidden" name="action" value="check">
                     <div class="answer_txt"> {{ answer_txt | safe }} </div>
 
@@ -92,7 +93,7 @@
                     <div class="answers-instruction">
                         Choose 1 answer:
                     </div>
-                    <form id="answer_form" method="post" action="/check">
+                    <form id="answer_form" method="post" action="/test">
                         <input type="hidden" name="action" value="check">
                     {% for ans in answers %}
                         <label class="option-container">
@@ -113,7 +114,7 @@
                     <div class="answer-instruction">
                         Choose all that apply:
                     </div>
-                    <form id="answer_form" method="post" action="/check">
+                    <form id="answer_form" method="post" action="/test">
                         <input type="hidden" name="action" value="check_ma">
                     {% for ans in answers %}
                         <label class="option-container">
@@ -159,6 +160,8 @@
         <p>{{ question_level }}</p>
     </section>
     <footer>
+        <!-- <form id="skip" action="/test" method="post"></form>
+        <input form="skip" type="hidden" name="action" value="skip"> -->
         <button id="skipBtn" class="nti button skip">
             Skip
         </button>
