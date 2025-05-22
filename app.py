@@ -8,7 +8,7 @@ from flask_session import Session
 from dotenv import load_dotenv
 import random as r
 
-from helpers import login_required, connect_db, close_db, binary_entropy_dict, validate_nti_mc_fb, print_beliefs, validate_ma, choose_lvl, update_beliefs, find_breaking_point
+from helpers import login_required, connect_db, close_db, binary_entropy_dict, validate_answer, print_beliefs, choose_lvl, update_beliefs, find_breaking_point
 
 CATEGORIES = ["trigonometry","algebra","statistics","calculus"]
 
@@ -57,9 +57,10 @@ def index():
         # create session fields
         session["tests"] = selected_test
         session["finished_tests"] = []
-        session["question_id"] = 0
         session["question_num"] = 0
         session["used_levels"] = []
+        session["new_question"] = True
+        session["correct_answers"] = []
 
         cur, conn = connect_db()
 
@@ -103,8 +104,8 @@ def login():
         user = cur.fetchone()  # Obtener resultados
 
         if user:
-            db_id = user['id']
-            db_username = user['username']
+            db_id = user["id"]
+            db_username = user["username"]
         else:
             return render_template("login.html", error="Email doesn't exist.")
 
@@ -190,7 +191,7 @@ def register():
             user = cur.fetchone()
 
             # Remember which user has logged in
-            session["user_id"] = user['id']
+            session["user_id"] = user["id"]
 
             session["username"] = username
 
@@ -207,288 +208,215 @@ def register():
         return render_template("register.html")
     
 
-@app.route("/check", methods=["GET", "POST"])
-def check():
-    action = request.form.get("action")
-    if action == "check":
-        result = validate_nti_mc_fb(request.form.get("answer"), session["question_id"])
-
-    elif action == "check_ma":
-        result = validate_ma(request.form.getlist("answer"), session["question_id"])
-
-    if result:
-            print("CORRECTO!!")
-            cur, conn = connect_db()
-
-            cur.execute("INSERT INTO user_answers (question_id, is_correct, test_id) VALUES (%s, %s, %s);", (session["question_id"], True, session[f"{session["question_category"]}_test_id"]))
-            conn.commit()
-
-            close_db(cur, conn)
-            session[f"{session["question_category"]}_beliefs"] = update_beliefs(True, session["question_level"], session[f"{session["question_category"]}_beliefs"])
-
-    else:
-        print("INCORRECTO!!")
-
-        cur, conn = connect_db()
-        cur.execute("INSERT INTO user_answers (question_id, is_correct, test_id) VALUES (%s, %s, %s);", (session["question_id"], False, session[f"{session["question_category"]}_test_id"]))
-        conn.commit()
-        close_db(cur, conn)
-        session[f"{session["question_category"]}_beliefs"] = update_beliefs(False, session["question_level"], session[f"{session["question_category"]}_beliefs"])
-
-    # Check if breaking point found
-    breaking_point = find_breaking_point(session[f"{session["question_category"]}_beliefs"])
-
-        # Save category's final level and remove finished test
-    if breaking_point:
-        session[f"{session["question_category"]}_final_level"] = breaking_point
-        session["tests"].remove(session["question_category"])
-
-        # Add to session finished tests and update tests (completed)
-        session["finished_tests"].append(session["question_category"])
-
-        print(f"user id = {session["user_id"]}")
-        print(f"category_id = {session[f"{session["question_category"]}_test_id"]}")
-        cur, conn = connect_db()
-        cur.execute("UPDATE tests SET completed = %s WHERE user_id = %s AND id = %s;", (True, session["user_id"], session[f"{session["question_category"]}_test_id"],))
-        conn.commit()
-        close_db(cur, conn)
-
-        # Check if any tests left
-        if session["tests"] == []:
-            return redirect(url_for("test_final"))
-        
-    session["question_id"] = 0
-    return redirect(url_for("test"))
-
-@app.route("/skip", methods=["GET", "POST"])
+@app.route("/skip", methods=["POST"])
 def skip():
-    print(f"pregunta a responder de nivel {session["question_level"]}")
     # Update beliefs based on failure (skip)
-    session[f"{session["question_category"]}_beliefs"] = update_beliefs(False, session["question_level"], session[f"{session["question_category"]}_beliefs"])
-    
+    session[f"{session["question"]["category_name"]}_beliefs"] = update_beliefs(False, session["question"]["level"], session[f"{session["question"]["category_name"]}_beliefs"])
+    session["question"]["user_answer"] = ""
+    session["correct"] = False
     # Update user_answers
     cur, conn = connect_db()
 
-    cur.execute("INSERT INTO user_answers (question_id, is_correct, test_id) VALUES (%s, %s, %s);", (session["question_id"], False, session[f"{session["question_category"]}_test_id"]))
+    cur.execute("INSERT INTO user_answers (question_id, is_correct, test_id) VALUES (%s, %s, %s);", (session["question"]["id"], False, session[f"{session["question"]["category_name"]}_test_id"]))
     conn.commit()
 
     close_db(cur, conn)
+    return redirect(url_for("feedback"))
 
-    session["question_id"] = 0
+        
+@app.route("/check", methods=["POST"])
+def check():
+    if session["question"]["type_name"] == "ma":
+        session["question"]["user_answer"] = request.form.getlist("answer")
+        result = validate_answer(session["question"]["user_answer"], session["question"]["id"], True)
+    else:
+        session["question"]["user_answer"] = request.form.get("answer") or ""
+        result = validate_answer(session["question"]["user_answer"], session["question"]["id"])
 
-    # Check if breaking point found
-    breaking_point = find_breaking_point(session[f"{session["question_category"]}_beliefs"])
-
-    if breaking_point:
-        session[f"{session["question_category"]}_final_level"] = breaking_point
-        session["tests"].remove(session["question_category"])
-
-        # Add to session finished tests and update tests (completed)
-        session["finished_tests"].append(session["question_category"])
-
-        print(f"user id = {session["user_id"]}")
-        print(f"category_id = {session[f"{session["question_category"]}_test_id"]}")
+    if result:
+        print("CORRECTO!!")
+        session["correct"] = True
         cur, conn = connect_db()
-        cur.execute("UPDATE tests SET completed = %s WHERE user_id = %s AND id = %s;", (True, session["user_id"], session[f"{session["question_category"]}_test_id"],))
+
+        cur.execute("INSERT INTO user_answers (question_id, is_correct, test_id) VALUES (%s, %s, %s);", (session["question"]["id"], True, session[f"{session["question"]["category_name"]}_test_id"]))
+        conn.commit()
+
+        close_db(cur, conn)
+        session[f"{session["question"]["category_name"]}_beliefs"] = update_beliefs(True, session["question"]["level"], session[f"{session["question"]["category_name"]}_beliefs"])
+    else:
+        print("INCORRECTO!!")
+        session["correct"] = False
+
+        cur, conn = connect_db()
+        cur.execute("INSERT INTO user_answers (question_id, is_correct, test_id) VALUES (%s, %s, %s);", (session["question"]["id"], False, session[f"{session["question"]["category_name"]}_test_id"]))
         conn.commit()
         close_db(cur, conn)
+        session[f"{session["question"]["category_name"]}_beliefs"] = update_beliefs(False, session["question"]["level"], session[f"{session["question"]["category_name"]}_beliefs"])
 
-        # Check if any tests left
-        if session["tests"] == []:
-            return redirect(url_for("test_final"))
-        
-    session["question_id"] = 0
-    return redirect(url_for("test"))
-        
+    # Redirect to feedback
+    return redirect(url_for("feedback"))
+    
 
+@app.route("/feedback", methods=["GET", "POST"])
+def feedback():
+    if request.method == "POST":
+        session["new_question"] = True
+        return redirect(url_for("test"))
+    elif request.method == "GET":
+        if session["question"]["type_name"] == "nti":
+            if session["correct"]:
+                session["question"]["answer_txt"] = session["question"]["answer_txt"].replace("__", f"<input type='text' name='answer' class='answer-input' value='{session["question"]["user_answer"]}' style='color: green; background-color: #d4edda; border: 1px solid #28a745;' autocomplete='off' disabled>")
+            else:
+                # Show correct answer
+                session["question"]["correct_answer_txt"] = session["question"]["answer_txt"].replace("__", f"\\( {session['question']['correct_answer']} \\)")
+                # Show user's answer (wrong)
+                session["question"]["answer_txt"] = session["question"]["answer_txt"].replace("__", f"<input type='text' name='answer' class='answer-input' value='{session["question"]["user_answer"]}' style='color: red; background-color: #f8d7da; border: 1px solid #dc3545;' autocomplete='off' disabled>")
+
+            return render_template("feedback.html",
+                                question=session["question"],
+                                username=session["username"],
+                                correct=session["correct"],
+                                )
+        
+        elif session["question"]["type_name"] == "mc" or session["question"]["type_name"] == "ma":
+            for answer in session["question"]["answers"]:
+                if answer["answer"] in session["question"]["user_answer"]:
+                    answer["selected"] = True
+                else:
+                    answer["selected"] = False
+            
+
+            return render_template("feedback.html",
+                                question=session["question"],
+                                username=session["username"],
+                                correct=session["correct"],
+                                )
+
+        elif session["question"]["type_name"] == "fb":
+            if session["correct"]:
+                select_html = "<select disabled class='answer-select correct'>"
+            else:
+                select_html = "<select disabled class='answer-select incorrect'>"
+            select_html += f"<option value='' disabled selected>{session['question']['user_answer']}</option>"
+            select_html += "</select>"
+            session["question"]["statement_improved"] = session["question"]["statement"].replace("__", select_html)
+            return render_template("feedback.html",
+                                question=session["question"],
+                                username=session["username"],
+                                correct=session["correct"],
+                                )
 
 @app.route("/test", methods=["GET"])
 def test():    
-    if request.method == "GET":
+    if session["new_question"] or session["question_num"] == 0:
+        session["new_question"] = False
+
+        if session["question_num"] != 0:
+            # Check if breaking point found
+            breaking_point = find_breaking_point(session[f"{session["question"]["category_name"]}_beliefs"])
+
+            if breaking_point:
+                session[f"{session["question"]["category_name"]}_final_level"] = breaking_point
+                session["tests"].remove(session["question"]["category_name"])
+
+                # Add to session finished tests and update tests (completed)
+                session["finished_tests"].append(session["question"]["category_name"])
+
+                print(f"user id = {session["user_id"]}")
+                print(f"category_id = {session[f"{session["question"]["category_name"]}_test_id"]}")
+                cur, conn = connect_db()
+                cur.execute("UPDATE tests SET completed = %s WHERE user_id = %s AND id = %s;", (True, session["user_id"], session[f"{session["question"]["category_name"]}_test_id"],))
+                conn.commit()
+                close_db(cur, conn)
+
+                # Check if any tests left
+                if session["tests"] == []:
+                    return redirect(url_for("test_final"))
+                
+        session["question_num"] += 1
 
         cur, conn = connect_db()
-        if session["question_id"] == 0:
-            print_beliefs(session["trigonometry_beliefs"])
-            print(binary_entropy_dict(session["trigonometry_beliefs"]))
+        print_beliefs(session["trigonometry_beliefs"])
+        print(binary_entropy_dict(session["trigonometry_beliefs"]))
 
-            # Determine random category
-            selected_tests = session.get("tests")
-            random_category = selected_tests[r.randint(0, len(selected_tests) - 1)]
+        # Determine random category
+        selected_tests = session.get("tests")
+        random_category = selected_tests[r.randint(0, len(selected_tests) - 1)]
 
 
-            # Choose question
-            chosen_lvl = choose_lvl(session[f"{random_category}_beliefs"], session["used_levels"])
+        # Choose question
+        chosen_lvl = choose_lvl(session[f"{random_category}_beliefs"], session["used_levels"])
 
-            session["question_num"] += 1 # DISPOSABLE 
+        # Remember used_levels
+        session["used_levels"].append(chosen_lvl)
 
-            # Remember used_levels
-            session["used_levels"].append(chosen_lvl)
+        # Select random question from chosen level (every needed field)
+        cur.execute("SELECT questions.id, questions.level, questions.statement, questions.equation, questions.question, questions.image_url, questions.format_hint, questions.answer_txt, questions.calculator, categories.name AS category_name, question_types.name AS type_name FROM questions JOIN categories ON questions.category_id = categories.id JOIN question_types ON questions.type_id = question_types.id WHERE questions.level = %s AND categories.name = %s ORDER BY RANDOM() LIMIT 1;", (chosen_lvl, random_category,)) 
 
-            # Select random question from chosen level
-            cur.execute("SELECT questions.id, questions.level, questions.statement, questions.equation, questions.question, questions.image_url, questions.format_hint, questions.answer_txt, questions.calculator, categories.name AS category_name, question_types.name AS type_name FROM questions JOIN categories ON questions.category_id = categories.id JOIN question_types ON questions.type_id = question_types.id WHERE questions.level = %s AND categories.name = %s ORDER BY RANDOM() LIMIT 1;", (chosen_lvl, random_category,)) 
-            question = cur.fetchone()
 
-            session["question_id"] = question["id"]
-            session["question_category"] = question["category_name"]
-            session["question_level"] = question["level"]
+        session["question"] = cur.fetchone()
+        
+        # Update needed fields for selected type question
+        if session["question"]["type_name"] == "nti":
+
+            session["question"]["answer_txt_nti"] = session["question"]["answer_txt"].replace("__", "<input form='answer_form' type='text' name='answer' class='answer-input' maxlength='15' autocomplete='off'>")
+            cur.execute("SELECT answer FROM answers WHERE question_id = %s", (session["question"]["id"],))
+            correct_answer = cur.fetchone()
+            session["question"]["correct_answer"] = correct_answer["answer"]
             
-            # Check if it is the correct category and type
-            if question['type_name'] == "nti":
+        elif session["question"]["type_name"] == "mc" or session["question"]["type_name"] == "ma":
 
-                answer_txt = question['answer_txt'].replace("__", "<input form='answer_form' type='text' name='answer' class='answer-input'>")
-                
-                close_db(cur, conn)
-                return render_template("test.html",
-                                    question_id=session["question_id"],
-                                    question_level = session["question_level"],
-                                    username=session["username"],
-                                    level=question['level'],
-                                    statement=question['statement'],
-                                    equation=question['equation'],
-                                    question=question['question'],
-                                    image_url = question['image_url'],
-                                    format_hint = question['format_hint'],
-                                    type=question['type_name'],
-                                    answer_txt=answer_txt,
-                                    calculator=question["calculator"])
+            cur.execute("SELECT answer, is_correct FROM answers WHERE question_id = %s", (session["question"]["id"],))
+            answers = cur.fetchall()
+
+            r.shuffle(answers)
+            for answer in answers:
+                if len(answer["answer"]) <= 100:
+                    answer["type"] = "text"
+                else:
+                    answer["type"] = "img"
             
-            elif question["type_name"] == "mc" or question["type_name"] == "ma":
+            session["question"]["answers"] = answers
+        
+        elif session["question"]["type_name"] == "fb":
 
-                cur.execute("SELECT answer FROM answers WHERE question_id = %s", (session["question_id"],)) 
-                answers = cur.fetchall()
+            cur.execute("SELECT answer, is_correct FROM answers WHERE question_id = %s", (session["question"]["id"],)) 
+            answers = cur.fetchall()
 
-                r.shuffle(answers)
-                for answer in answers:
-                    if len(answer["answer"]) <= 50:
-                        answer["type"] = "text"
-                    else:
-                        answer["type"] = "img"
-                
-                close_db(cur, conn)
-                return render_template("test.html",
-                                    question_id=session["question_id"],
-                                    question_level = session["question_level"],
-                                    username=session["username"],
-                                    level=question['level'],
-                                    statement=question['statement'],
-                                    equation=question['equation'],
-                                    question=question['question'],
-                                    image_url = question['image_url'],
-                                    type=question['type_name'],
-                                    answers=answers,
-                                    calculator=question["calculator"])
-            
-            
-            elif question["type_name"] == "fb":
+            r.shuffle(answers)  # shuffle answers
 
-                cur.execute("SELECT answer FROM answers WHERE question_id = %s", (session["question_id"],)) 
-                answers = cur.fetchall()  # [{'answer': 'sides'}, {'answer': 'angles'}, ...]
+            session["question"]["answers"] = answers
 
-                r.shuffle(answers)  # Mezclar las opciones
+            # Crear el HTML del <select>
+            select_html = "<select form='answer_form' name='answer' class='answer-select'>"
+            select_html += "<option value='' disabled selected>Select an option</option>"
+            for a in answers:
+                if a["is_correct"] == True:
+                    session["question"]["correct_answer"] = a["answer"]
+                select_html += f"<option value='{a['answer']}'>{a['answer']}</option>"
+            select_html += "</select>"
 
-                # Crear el HTML del <select>
-                select_html = "<select form='answer_form' name='answer' class='answer-select'>"
-                select_html += "<option value='' disabled selected>Select an option</option>"
-                for a in answers:
-                    select_html += f"<option value='{a['answer']}'>{a['answer']}</option>"
-                select_html += "</select>"
+            # Reemplazar "__" en el statement por el <select>
+            session["question"]["statement_improved"] = session["question"]["statement"].replace("__", select_html)
 
-                # Reemplazar "__" en el statement por el <select>
-                statement_fb = question["statement"].replace("__", select_html)
+        close_db(cur, conn)
+        return render_template("test.html",
+                            question=session["question"],
+                            username=session["username"],
+                            )
 
-                close_db(cur, conn)
-                return render_template("test.html",
-                                    question_id=session["question_id"],
-                                    question_level = session["question_level"],
-                                    username=session["username"],
-                                    level=question['level'],
-                                    statement_fb=statement_fb,
-                                    equation=question['equation'],
-                                    image_url=question['image_url'],
-                                    type=question['type_name'],
-                                    calculator=question["calculator"])
-
-
-
-        else:
-            # Return same question using question ID
-            cur.execute("SELECT questions.id, questions.level, questions.statement, questions.equation, questions.question, questions.image_url, questions.format_hint, questions.answer_txt, questions.calculator, categories.name AS category_name, question_types.name AS type_name FROM questions JOIN categories ON questions.category_id = categories.id JOIN question_types ON questions.type_id = question_types.id WHERE questions.id = %s;", (session["question_id"],)) 
-            question = cur.fetchone()
-            if question["type_name"] == "mc" or question["type_name"] == "ma" or question["type_name"] == "fb":
-                cur.execute("SELECT answer FROM answers WHERE question_id = %s", (session["question_id"],))
-                answers = cur.fetchall()
-                r.shuffle(answers)
-                for answer in answers:
-                    if len(answer["answer"]) <= 50:
-                        answer["type"] = "text"
-                    else:
-                        answer["type"] = "img"
-                        
-            if question["type_name"] == "nti":
-                answer_txt = question['answer_txt'].replace("__", "<input form='answer_form' type='text' name='answer' class='answer-input'>")
-
-                close_db(cur, conn)
-                return render_template("test.html",
-                                    question_id=session["question_id"],
-                                    question_level = session["question_level"],
-                                    username=session["username"],
-                                    level=question['level'],
-                                    statement=question['statement'],
-                                    equation=question['equation'],
-                                    question=question['question'],
-                                    image_url=question['image_url'],
-                                    format_hint=question['format_hint'],
-                                    type=question['type_name'],
-                                    answer_txt=answer_txt,
-                                    calculator=question["calculator"]
-                                    )
-
-            if question["type_name"] == "mc" or question["type_name"] == "ma":
-                close_db(cur, conn)
-                return render_template("test.html",
-                                    question_id=session["question_id"],
-                                    question_level = session["question_level"],
-                                    username=session["username"],
-                                    level=question['level'],
-                                    statement=question['statement'],
-                                    equation=question['equation'],
-                                    question=question['question'],
-                                    image_url = question['image_url'],
-                                    type=question['type_name'],
-                                    answers=answers,
-                                    calculator=question["calculator"]
-                                    )
-            
-            if question["type_name"] == "fb":
-
-                # Crear el HTML del <select>
-                select_html = "<select form='answer_form' name='answer' class='answer-select'>"
-                select_html += "<option value='' disabled selected>Select an option</option>"
-                for a in answers:
-                    select_html += f"<option value='{a['answer']}'>{a['answer']}</option>"
-                select_html += "</select>"
-
-                # Reemplazar "__" en el statement por el <select>
-                statement_fb = question["statement"].replace("__", select_html)
-
-                close_db(cur, conn)
-                return render_template("test.html",
-                                    question_id=session["question_id"],
-                                    question_level = session["question_level"],
-                                    username=session["username"],
-                                    level=question['level'],
-                                    statement_fb=statement_fb,
-                                    equation=question['equation'],
-                                    image_url=question['image_url'],
-                                    type=question['type_name'],
-                                    calculator=question["calculator"]
-                                    )
+    else:
+        # Return same question               
+        return render_template("test.html",
+                            question=session["question"],
+                            username=session["username"],
+                            )
         
 
 
 @app.route("/exit-test", methods=["POST"])
 def exit_test():
-    del session["question_id"]
+    del session["question"]
     del session["tests"]
     del session["question_level"] 
     del session["question_num"]

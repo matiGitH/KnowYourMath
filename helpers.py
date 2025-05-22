@@ -51,37 +51,43 @@ def close_db(cur, conn):
     return
 
 
-def validate_nti_mc_fb(answer, question_id):
-    """ Validates nti, mc and fb answer. Takes 2 parameters: answer, question_id.
+def validate_answer(answers, question_id, ma=False):
+    """ Validates answer. Takes 3 parameters: 
+    answer: user answer/s
+    ma: is type ma (True/False)
+    question_id: question's id
     Returns TRUE (correct) or FALSE (incorrect)
     """
-    print(f"question_id = {question_id}")
-    print(f"question_lvl = {session["question_level"]}")
-
     cur, conn = connect_db()
-    cur.execute("SELECT answers.answer FROM answers JOIN questions ON answers.question_id = questions.id WHERE questions.id = %s AND answers.is_correct = TRUE;", (question_id,))
-    results = cur.fetchone()
-    close_db(cur, conn)
-
-    if results["answer"] == answer:
-        return True
+    if ma:
+        user_answers = set(answers)  # lista a set
+        cur.execute("SELECT answers.answer FROM answers JOIN questions ON answers.question_id = questions.id WHERE questions.id = %s AND answers.is_correct = TRUE;", (question_id,))
+        results = cur.fetchall()
+        correct_answers = {row["answer"] for row in results}  # dicts a set
+        return user_answers == correct_answers
     else:
-        return False
+        cur.execute("SELECT answers.answer FROM answers JOIN questions ON answers.question_id = questions.id WHERE questions.id = %s AND answers.is_correct = TRUE;", (question_id,))
+        results = cur.fetchone()
+        if results["answer"] == answers:
+            return True
+        else:
+            return False
+
     
-def validate_ma(answers, question_id):
-    """ Validates ma answer. Takes 2 parameters: answers (a list that contains the answers), question_id.
-    Returns TRUE (correct) or FALSE (incorrect) """
+# def validate_ma(answers, type, question_id):
+#     """ Validates ma answer. Takes 2 parameters: answers (a list that contains the answers), question_id.
+#     Returns TRUE (correct) or FALSE (incorrect) """
 
-    user_answers = set(answers)  # lista a set
+#     user_answers = set(answers)  # lista a set
 
-    cur, conn = connect_db()
-    cur.execute("SELECT answers.answer FROM answers JOIN questions ON answers.question_id = questions.id WHERE questions.id = %s AND answers.is_correct = TRUE;", (question_id,))
-    results = cur.fetchall()
-    close_db(cur, conn)
+#     cur, conn = connect_db()
+#     cur.execute("SELECT answers.answer FROM answers JOIN questions ON answers.question_id = questions.id WHERE questions.id = %s AND answers.is_correct = TRUE;", (question_id,))
+#     results = cur.fetchall()
+#     close_db(cur, conn)
 
-    correct_answers = {row["answer"] for row in results}  # dicts a set
+#     correct_answers = {row["answer"] for row in results}  # dicts a set
 
-    return user_answers == correct_answers
+#     return user_answers == correct_answers
                 
 def choose_lvl(beliefs, used_levels):
 

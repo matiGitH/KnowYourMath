@@ -119,7 +119,6 @@ section {
     font-style: italic;
     font-size: 1.05rem;
     font-weight: 300;
-
 }
 
 .answer_txt {
@@ -232,7 +231,7 @@ footer {
     display: none;
 }
 
-/* Círculo para MC */
+/* MC circle */
 .custom-radio {
     width: 20px;
     height: 20px;
@@ -250,7 +249,7 @@ footer {
     background-color: #ff6200;
 }
 
-/* Cuadrado para MA */
+/* MA checkbox */
 .custom-checkbox {
     width: 20px;
     height: 20px;
@@ -400,4 +399,120 @@ footer {
 
 .hidden {
     display: none
+}
+
+.skip-disabled{
+    opacity: 0.5;
+    cursor: auto !important;
+    padding: 0.5rem 1.5rem;
+    font-size: 1.2rem;
+    font-family: 'Poppins', sans-serif;
+    background: none;
+    border: none;
+    color: #ff6200;
+    font-weight: bold;
+    position: relative;
+    cursor: pointer;
+    padding: 0;
+    height: auto;
+}
+
+.correct-answer-txt{
+    color: green;
+    margin-top: 0.75rem;
+}
+
+.correct-text {
+    color: green;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.option-container-mcma-feedback {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    margin-bottom: 15px;
+    background-color: #FF474C;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    position: relative;
+}
+
+.option-container-mcma-feedback.correct{
+    background-color: lightgreen;
+}
+
+.option-container-mcma-feedback.correct.selected{
+    background-color: green;
+}
+
+.option-container-mcma-feedback.selected{
+    background-color: red;
+}
+
+.option-container-mcma-feedback input[type="radio"],
+.option-container-mcma-feedback input[type="checkbox"] {
+    display: none;
+}
+
+.custom-radio-feedback {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+    margin-right: 15px;
+    transition: background-color 0.3s;
+}
+
+.option-container-mcma-feedback input[type="radio"]:checked + .custom-radio-feedback {
+    background-color: #ff6200;
+}
+
+/* MA checkbox */
+.custom-checkbox-feedback {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    background-color: #e0e0e0;
+    margin-right: 15px;
+    transition: background-color 0.3s;
+    position: relative;
+}
+
+/* Tilde al seleccionar */
+.custom-checkbox-feedback::after {
+    content: "✓";
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.option-container-mcma-feedback input[type="checkbox"]:checked + .custom-checkbox-feedback::after {
+    opacity: 1;
+}
+
+.option-container-mcma-feedback input[type="checkbox"]:checked + .custom-checkbox-feedback {
+    background-color: #ff6200;
+}
+
+.answer-select.correct {
+    border: 2px solid green;
+    color: green;
+    opacity: 1;
+    cursor: auto;
+}
+
+.answer-select.incorrect {
+    border: 2px solid red;
+    color: red;
+    opacity: 1;
+    cursor: auto;
 }

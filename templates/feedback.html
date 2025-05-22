@@ -10,10 +10,7 @@
 {% endblock %}
 
 {% block js %}
-    <!-- app.js link -->
-    <script defer src="{{ url_for('static', filename='test.js') }}"></script>
     <script>
-        console.log("aca no tamo un choto chelo")
         window.MathJax = {
             tex: {
                 inlineMath: [['\\(', '\\)']],
@@ -22,8 +19,10 @@
             svg: {
                 fontCache: 'global'
             },
-            renderActions: {
-                addMenu: []  // Opcional: desactiva el menú para prevenir cambios
+            options: {
+                renderActions: {
+                    addMenu: []  // Opcional: desactiva el menú para prevenir cambios
+                }
             }
         };
     </script>
@@ -42,17 +41,6 @@
             </div>
         </div>
     </nav>
-    <!-- Alerta personalizada -->
-    <div id="customAlert" class="overlay hidden">
-        <div class="alert-box">
-            <h3>Are you sure?</h3>
-            <p>This will count as a wrong answer.</p>
-            <form method="post" action="/skip">
-                <button type="submit" class="confirm">Yes, skip</button>
-                <button type="button" class="cancel" id="cancelSkip">Cancel</button>
-            </form>
-        </div>
-    </div>
     <section>
         <div class="exercise-container">
             
@@ -85,9 +73,9 @@
                         <div class="format_hint"> {{ question.format_hint | safe }} </div>
                     {% endif %}
 
-                    <form id="answer_form" method="post" action="/check"></form>
-                    <input form="answer_form" type="hidden" name="action" value="check">
-                    <div class="answer_txt"> {{ question.answer_txt_nti | safe }} </div>
+                    <div class="answer_txt"> {{ question.answer_txt | safe }} </div>
+
+                    <div class="correct-answer-txt"> {{ question.correct_answer_txt | safe }} </div>
 
 
 
@@ -95,43 +83,36 @@
                     <div class="answers-instruction">
                         Choose 1 answer:
                     </div>
-                    <form id="answer_form" method="post" action="/check">
-                        <input type="hidden" name="action" value="check">
                     {% for ans in question.answers %}
-                        <label class="option-container">
-                        <input type="radio" name="answer" value="{{ ans.answer}}">
-                        <span class="custom-radio"></span>
+                        <label class="option-container-mcma-feedback {% if ans.selected %}selected{% endif %} {% if ans.is_correct %}correct{% endif %}">
+                            <input disabled type="radio" name="answer" value="{{ ans.answer }}" {% if ans.selected %}checked{% endif %}> 
+                            <span class="custom-radio-feedback"></span>
 
-                        {% if ans.type == 'text' %}
-                            <span class="answer-text">{{ ans.answer | safe }}</span>
-                        {% elif ans.type == 'img' %}
-                            <img src="{{ ans.answer }}" alt="Answer Image" class="answer-img">
-                        {% endif %}
+                            {% if ans.type == 'text' %}
+                                <span class="answer-text">{{ ans.answer | safe }}</span>
+                            {% elif ans.type == 'img' %}
+                                <img src="{{ ans.answer }}" alt="Answer Image" class="answer-img">
+                            {% endif %}
                         </label>
                     {% endfor %}    
-                    </form>
                 
                 {% elif question.type_name == "ma" %}
                     
                     <div class="answer-instruction">
                         Choose all that apply:
                     </div>
-                    <form id="answer_form" method="post" action="/check">
-                        <input type="hidden" name="action" value="check">
                     {% for ans in question.answers %}
-                        <label class="option-container">
-                        <input type="checkbox" name="answer" value="{{ ans.answer }}">
-                        <span class="custom-checkbox"></span>
-                        
-                        {% if ans.type == 'text' %}
-                            <span class="answer-text">{{ ans.answer }}</span>
-                        {% elif ans.type == 'img' %}
-                            <img src="{{ ans.answer }}" alt="Answer Image" class="answer-img">
-                        {% endif %}
+                        <label class="option-container-mcma-feedback {% if ans.selected %}selected{% endif %} {% if ans.is_correct %}correct{% endif %}">
+                            <input disabled type="checkbox" name="answer" value="{{ ans.answer }}" {% if ans.selected %}checked{% endif %}>
+                            <span class="custom-checkbox-feedback"></span>
+                            
+                            {% if ans.type == 'text' %}
+                                <span class="answer-text">{{ ans.answer }}</span>
+                            {% elif ans.type == 'img' %}
+                                <img src="{{ ans.answer }}" alt="Answer Image" class="answer-img">
+                            {% endif %}
                         </label>
                     {% endfor %}
-                    </form>
-
                 {% endif %}
                 
                 
@@ -149,24 +130,26 @@
                         <img src="{{ question.image_url }} " alt="">
                     </div>
                 {% endif %}
-
-                <form id="answer_form" method="post" action="/check">
-                    <input type="hidden" name="action" value="check">
                     <div class="statement-fb">
-                      {{ question.statement_improved | safe }}
+                        {{ question.statement_improved | safe }}
                     </div>
-                  </form>
+                {% if not correct %}
+                    <p class="correct-answer-txt">
+                        Correct answer: {{ question.correct_answer }}
+                    </p>
+                {% endif %}
             {% endif %}
         </div>
         <p>{{ question.id }}</p>
         <p>{{ question.level }}</p>
     </section>
     <footer>
-        <button id="skipBtn" class="nti button skip">
+        <button id="skipBtn" class="skip-disabled" disabled>
             Skip
         </button>
-        <button form="answer_form" class="nti button check">
-            Check
+        <form id="next_question" action="/feedback" method="POST"></form>
+        <button form="next_question" class="nti button check">
+            Next question
         </button>
     </footer>
 {% endblock %}
