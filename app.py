@@ -416,12 +416,16 @@ def test():
 
 @app.route("/exit-test", methods=["POST"])
 def exit_test():
-    del session["question"]
-    del session["tests"]
-    del session["question_level"] 
-    del session["question_num"]
-    del session["used_levels"]
-    del session["finished_tests"]
+    if "question" in session:
+        del session["question"]
+    if "tests" in session:
+        del session["tests"]
+    if "question_num" in session:
+        del session["question_num"]
+    if "used_levels" in session:
+        del session["used_levels"]
+    if "finished_tests" in session:
+        del session["finished_tests"]
 
     for category in CATEGORIES:
         if f"{category}_beliefs" in session:
