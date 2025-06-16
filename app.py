@@ -8,7 +8,7 @@ from flask_session import Session
 from dotenv import load_dotenv
 import random as r
 
-from helpers import login_required, connect_db, close_db, binary_entropy_dict, validate_answer, print_beliefs, choose_lvl, update_beliefs, find_breaking_point
+from helpers import login_required, connect_db, close_db, binary_entropy_dict, validate_answer, print_beliefs, choose_lvl, update_beliefs, find_breaking_point, choose_level_exploring
 
 CATEGORIES = ["trigonometry","algebra","statistics","calculus"]
 
@@ -66,7 +66,7 @@ def index():
 
         for category in selected_test:
             session[f"{category}_beliefs"] = {i: 0.5 for i in range(1, 101)}
-
+            session[f"{category}_exploring"] = False
             # Insert each test into tests
             cur.execute("SELECT id FROM categories WHERE name = %s", (category,))
             category_db = cur.fetchone()
@@ -308,45 +308,61 @@ def feedback():
 
 @app.route("/test", methods=["GET"])
 def test():    
-    if session["new_question"] or session["question_num"] == 0:
+    # Set exploring to False if question number 0
+    try:
+        exploring = session[f"{session['question']['category_name']}_exploring"]
+    except: 
+        exploring = False
+
+    if session["new_question"]:
+        cur, conn = connect_db()
+
+        # Prints
+        print_beliefs(session["trigonometry_beliefs"])
+        print(binary_entropy_dict(session["trigonometry_beliefs"]))
+
         session["new_question"] = False
 
-        if session["question_num"] != 0:
+        # Determine random category
+        selected_tests = session.get("tests")
+        random_category = selected_tests[r.randint(0, len(selected_tests) - 1)] # MODIFICAR (usar random choice)
+
+        if not exploring and session["question_num"] != 0:
             # Check if breaking point found
             breaking_point = find_breaking_point(session[f"{session["question"]["category_name"]}_beliefs"])
 
             if breaking_point:
+                print(f"breaking point found: {breaking_point}")
                 session[f"{session["question"]["category_name"]}_final_level"] = breaking_point
-                session["tests"].remove(session["question"]["category_name"])
+                session[f"{session["question"]["category_name"]}_exploring"] = True
 
-                # Add to session finished tests and update tests (completed)
+        # CHOOSE QUESTION
+        if exploring == True:
+            user_level = session[f"{session["question"]["category_name"]}_final_level"]
+            chosen_lvl = choose_level_exploring(user_level, session["used_levels"], 7)
+            # If no more levels available (end of exploring)
+            print(f"EXPLORING: question lvl {chosen_lvl}")
+            if not chosen_lvl:
+                # add test to finished tests
                 session["finished_tests"].append(session["question"]["category_name"])
 
-                print(f"user id = {session["user_id"]}")
-                print(f"category_id = {session[f"{session["question"]["category_name"]}_test_id"]}")
-                cur, conn = connect_db()
+                # remove test from tests
+                session["tests"].remove(session["question"]["category_name"])
+
+                # Update test as completed in db
                 cur.execute("UPDATE tests SET completed = %s WHERE user_id = %s AND id = %s;", (True, session["user_id"], session[f"{session["question"]["category_name"]}_test_id"],))
                 conn.commit()
-                close_db(cur, conn)
 
                 # Check if any tests left
                 if session["tests"] == []:
+                    close_db(cur, conn)
                     return redirect(url_for("test_final"))
-                
+        else:
+            # Choose question
+            chosen_lvl = choose_lvl(session[f"{random_category}_beliefs"], session["used_levels"])
+
         session["question_num"] += 1
-
-        cur, conn = connect_db()
-        print_beliefs(session["trigonometry_beliefs"])
-        print(binary_entropy_dict(session["trigonometry_beliefs"]))
-
-        # Determine random category
-        selected_tests = session.get("tests")
-        random_category = selected_tests[r.randint(0, len(selected_tests) - 1)]
-
-
-        # Choose question
-        chosen_lvl = choose_lvl(session[f"{random_category}_beliefs"], session["used_levels"])
-
+        
         # Remember used_levels
         session["used_levels"].append(chosen_lvl)
 

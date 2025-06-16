@@ -228,6 +228,35 @@ def find_uncertain_range(dict):
                         return range(i, i+j)
                 except:
                     return range(i, 101)
+                
+
+
+def choose_level_exploring(my_range: range, used_levels: list, extension: int):
+    """
+    Choose a level in exploring mode. Parameters:
+    my_range: user's level range
+    used_levels: already used levels
+    extension: how much to extend the user's level range to look for questions
+    """
+    start = my_range.start
+    end = my_range.stop - 1  # El último número incluido en el rango original
+
+    new_start = max(1, start - extension)
+    new_end = min(100, end + extension)
+
+    if new_start > new_end:
+        raise ValueError("new_start > new_end choose_level_exploring")
+
+    possible_levels = set(range(new_start, new_end + 1))
+    used_levels = set(used_levels)
+
+    available_levels = possible_levels - used_levels
+
+    if not available_levels:
+        return False
+
+    return random.choice(list(available_levels))
+
 
 
 # def choose_lvl(beliefs, used_levels):
