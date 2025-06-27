@@ -5,14 +5,81 @@
 {% endblock %}
 
 {% block css %}
-
+    <!-- styles.css link -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='review.css') }}">
 {% endblock %}
 
 {% block js %}
-
+    <!-- app.js link -->
+    <script defer src="{{ url_for('static', filename='review.js') }}"></script>
 {% endblock %}
 
 {% block main %}
-    <p>{{ trigonometry_final_level }}</p>
-    <p>{{ question_num }}</p>
+    <nav class="nav">
+        <div class="nav-home">
+            <form id="exit" action="/exit-test" method="post"></form>
+            <input form="exit" type="hidden">
+            <button form="exit">KnowYourMath</button>
+        </div>
+        <div class="nav-session">
+            <a href="">{{ username }}</a>
+        </div>
+        </div>
+    </nav>
+    <section class="review-intro">
+        <div class="intro-content">
+            <h1>Your Estimated Level: <span class="level-range">{{ final_level_start }}–{{ final_level_stop }}</span></h1>
+            <p class="level-message">
+                {{ summary_text }}
+            </p>
+        </div>
+    </section>
+    <section class="performance-graph">
+        <h1>Overall performance</h1>
+        <p>This is just a curiosity. Yet, you might find it interesting.</p>
+        <img src="data:image/png;base64,{{ plot_data }}">
+    </section>
+    <section class="attributes weaknesses">
+        <h1>Weaknesses</h1>
+        <p>Take a look at the subjects you struggled the most with and strengthen your knowledge through the suggested
+            resources.</p>
+        {% for weakness in weaknesses %}
+            <div class="topic">
+                <div class="topic-header" onclick="toggleTopic(this)">{{ weakness.subject }}</div>
+                <div class="materials">
+                    {% for material in weakness.materials %}
+                        <div class="material" onmouseenter="showDesc(this)" onmouseleave="hideDesc(this)">
+                            <a href="{{ material.url }}" target="_blank">{{ material.title }}</a>
+                            <div class="material-desc">{{ material.summary }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    </section>
+    <section class="attributes strengths">
+        <h1>Strengths</h1>
+        <p>Here you'll find the subjects you aced, showing complete domain. Don't worry, you won't need any of the study
+            material for these.</p>
+        <!-- Ouch! You don't have any strengths yet... You better focus on those weaknesses! -->
+        {% for strength in strengths %}
+            <div class="topic">
+                <div class="topic-header" onclick="toggleTopic(this)">{{ strength.subject }}</div>
+                <div class="materials">
+                    {% for material in strength.materials %}
+                        <div class="material" onmouseenter="showDesc(this)" onmouseleave="hideDesc(this)">
+                            <a href="{{ material.url }}" target="_blank">{{ material.title }}</a>
+                            <div class="material-desc">{{ material.summary }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    </section>
+    <section class="review-end">
+        <h2>Thank you for completing the test!</h2>
+        <p>You can view your results from the home page and compare them with your previous test history.</p>
+        <a href="/" class="return-button">Back to Home</a>
+    </section>
+    
 {% endblock %}

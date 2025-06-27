@@ -133,19 +133,75 @@
       </div>
       
       <section id="progress" class="progress-section">
-        {% if not logged_in %}
-          <p>Please log in to view your progress.</p>
-
-        {% elif not has_results %}
-          <p>You will see your progress here once you complete a test.</p>
-        
+        {% if "user_id" not in session %}
+        <p>Please log in to view your progress.</p>
+      
         {% else %}
-          <h2>Your Progress</h2>
-          <ul>
-            {% for result in results %}
-              <li>{{ result.test_name }}: {{ result.score }}%</li>
-            {% endfor %}
-          </ul>
+          <h1>Your Test History</h1>
+
+          <div class="accordion">
+
+            <div class="accordion-item">
+              <div class="accordion-header">Trigonometry</div>
+              <div class="accordion-content">
+                {% for test in tests.trigonometry %}
+                <div class="test-entry">
+                  <div class="test-info">
+                    <span>{{ test.date }}</span>
+                    <span>Level: {{ test.level_range }}</span>
+                  </div>
+                  <a href="/review/test/{{ test.id }}" class="view-link">View</a>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <div class="accordion-header">Algebra</div>
+              <div class="accordion-content">
+                {% for test in tests.algebra %}
+                <div class="test-entry">
+                  <div class="test-info">
+                    <span>{{ test.date }}</span>
+                    <span>Level: {{ test.level_range }}</span>
+                  </div>
+                  <a href="/review/test/{{ test.id }}" class="view-link">View</a>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <div class="accordion-header">Calculus</div>
+              <div class="accordion-content">
+                {% for test in tests.calculus %}
+                <div class="test-entry">
+                  <div class="test-info">
+                    <span>{{ test.date }}</span>
+                    <span>Level: {{ test.level_range }}</span>
+                  </div>
+                  <a href="/review/test/{{ test.id }}" class="view-link">View</a>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <div class="accordion-header">Statistics</div>
+              <div class="accordion-content">
+                {% for test in tests.statistics %}
+                <div class="test-entry">
+                  <div class="test-info">
+                    <span>{{ test.date }}</span>
+                    <span>Level: {{ test.level_range }}</span>
+                  </div>
+                  <a href="/review/test/{{ test.id }}" class="view-link">View</a>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+
+          </div>
         {% endif %}
       </section>
       

@@ -438,6 +438,7 @@ footer {
     cursor: pointer;
     transition: background-color 0.3s;
     position: relative;
+    cursor: auto;
 }
 
 .option-container-mcma-feedback.correct{

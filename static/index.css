@@ -429,11 +429,99 @@ button.enabled:hover {
 }
 
 .progress-section {
-    width: 100vw;
+    max-width: 80vw;
     height: 100vh;
+    overflow-y: auto;
     background-color: white;
+    display: unset;
 }
 
+.progress-section h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.accordion {
+    max-width: 800px;
+    margin: 0 auto;
+    border-radius: 1rem;
+}
+
+.accordion-item {
+    margin-bottom: 1.5rem;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.3s ease;
+}
+
+.accordion-header {
+    background-color: #1c1d1e;
+    color: white;
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 1rem;
+    transition: background-color 0.3s ease, border-radius 0.3s;
+}
+
+.accordion-header:hover {
+    background-color: #ff6200;
+}
+
+.accordion-header::after {
+    content: '▸';
+    transition: transform 0.3s;
+}
+
+.accordion-header.active::after {
+    transform: rotate(90deg);
+}
+
+.accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    background-color: #f9f9f9;
+    padding: 0 2rem;
+    transition: max-height 0.5s ease, padding 0.3s ease;
+}
+
+.accordion-content.open {
+    padding: 1rem 2rem 1.5rem;
+}
+
+.test-entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    background-color: #fff;
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.test-entry .test-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.test-entry .view-link {
+    background-color: #ff6200;
+    color: white;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    border-radius: 0.5rem;
+    transition: background-color 0.3s;
+}
+
+.test-entry .view-link:hover {
+    background-color: #e05700;
+}
+  
 .about-me {
     position: relative;
     background-color: var(--orange);

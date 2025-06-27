@@ -4,6 +4,11 @@ import random
 import math
 import statistics
 import numpy as np
+import io
+import base64
+import matplotlib
+matplotlib.use('Agg') # Prevent matplotlib from using Tkinter
+import matplotlib.pyplot as plt
 from psycopg2.extras import RealDictCursor
 from flask import redirect, render_template, session, g
 from functools import wraps
@@ -11,11 +16,6 @@ from dotenv import load_dotenv
 
 
 # Define constants
-TRIGONOMETRY_QUESTIONS_NUM = 142
-STATISTICS_QUESTIONS_NUM = 0
-ALGEBRA_QUESTIONS_NUM = 0
-CALCULUS_QUESTIONS_NUM = 0
-
 CHANGE_FACTOR = 0.15
 
 load_dotenv()
@@ -254,32 +254,49 @@ def choose_level_exploring(my_range: range, used_levels: list, extension: int):
 
     if not available_levels:
         return False
-
+    print("AVAILABLE LEVELS")
+    print(available_levels)
     return random.choice(list(available_levels))
 
+LEVEL_SUMMARIES = {
+    "1-20": "You're just starting out on your journey. Many fundamental concepts are still unfamiliar, but that's completely normal. This review will guide you step by step toward a stronger foundation.",
+    "21-40": "You've grasped some of the basics, but there's still work ahead. This review will help you identify what to reinforce and how to move confidently into the next level.",
+    "41-60": "You're right in the middle of the path — with a solid grasp of many core ideas. There's room to grow, and this review highlights exactly where your strengths and weaknesses lie.",
+    "61-80": "You've reached an advanced understanding of the subject. While you've mastered much, some fine-tuning can push you even further. Let's dive into your performance and uncover where to focus next.",
+    "81-100": "You're performing at a near-expert level. Your understanding is deep, and only minor adjustments remain. This review will show where you can sharpen your edge even further."
+}
 
+def get_level_summary(level):
+    if level <= 20:
+        return LEVEL_SUMMARIES["1-20"]
+    elif level <= 40:
+        return LEVEL_SUMMARIES["21-40"]
+    elif level <= 60:
+        return LEVEL_SUMMARIES["41-60"]
+    elif level <= 80:
+        return LEVEL_SUMMARIES["61-80"]
+    else:
+        return LEVEL_SUMMARIES["81-100"]
 
-# def choose_lvl(beliefs, used_levels):
-#     information_gain_dict = {}
+def plot_beliefs(beliefs_dict):
+    # Crear figura
+    fig, ax = plt.subplots(figsize=(10, 4))
+    levels = list(beliefs_dict.keys())
+    probs = list(beliefs_dict.values())
+    
+    ax.plot(levels, probs, color='orange')
+    ax.set_xlabel("Question's level")
+    ax.set_ylabel("Success probability")
+    ax.set_title("System's beliefs")
+    ax.grid(True)
+    ax.set_ylim(0, 1)
 
-#     for level in beliefs:
-#         p_correct = beliefs[level]
-#         p_wrong = 1 - p_correct
+    # Guardar en memoria
+    img = io.BytesIO()
+    plt.savefig(img, format='png')
+    plt.close(fig)
+    img.seek(0)
+    # Codificar en base64
+    plot_url = base64.b64encode(img.getvalue()).decode('utf8')
+    return plot_url
 
-#         positive_beliefs = update_beliefs(True, level, beliefs.copy(), False)
-#         gain_if_correct = sum(positive_beliefs.values()) - sum(beliefs.values())
-
-#         negative_beliefs = update_beliefs(False, level, beliefs.copy(), False)
-#         gain_if_wrong = max(sum(beliefs.values()) - sum(negative_beliefs.values()), 0)
-
-#         information_gain_dict[f"{level}"] = (p_correct * gain_if_correct + p_wrong * gain_if_wrong)
-
-#     max_value = max(information_gain_dict.values())
-
-#     print_beliefs(information_gain_dict)
-
-#     for i in information_gain_dict:
-#         if information_gain_dict[i] == max_value:
-#             if i in used_levels:
-#                 raise ValueError("We screwed up goofy")
-#             return i

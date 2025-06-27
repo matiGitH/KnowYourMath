@@ -9,7 +9,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
     cancelBtn.addEventListener("click", () => {
         alertBox.classList.add("hidden");
-        console.log("tamo chelo")
     });
 });
-console.log("aca tamo no tan chelo")

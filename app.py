@@ -1,6 +1,7 @@
 import os
 import psycopg2
 import re
+import json
 import random
 from datetime import datetime, date
 from flask import Flask, render_template, redirect, session, request, url_for
@@ -8,9 +9,11 @@ from flask_session import Session
 from dotenv import load_dotenv
 import random as r
 
-from helpers import login_required, connect_db, close_db, binary_entropy_dict, validate_answer, print_beliefs, choose_lvl, update_beliefs, find_breaking_point, choose_level_exploring
+from helpers import login_required, connect_db, close_db, binary_entropy_dict, validate_answer, print_beliefs, choose_lvl, update_beliefs, find_breaking_point, choose_level_exploring, get_level_summary, plot_beliefs
 
 CATEGORIES = ["trigonometry","algebra","statistics","calculus"]
+
+EXPLORING_FACTOR = 3
 
 # Cargar variables de entorno
 load_dotenv()
@@ -43,20 +46,47 @@ def index():
         cur, conn = connect_db()
 
         cur.execute("DELETE FROM user_answers WHERE test_id IN (SELECT id FROM tests WHERE completed = false);")
-        cur.execute("DELETE FROM tests WHERE completed = false;") # AND started_at < now() - interval '30 minutes'; (logic for deleting only those that are 30 minutes old)
-
+        cur.execute("DELETE FROM tests WHERE completed = false;")
         conn.commit()
 
-        close_db(cur, conn)
+        # Progress section data
+        if "user_id" in session:
+            # Returns all tests completed by the user with a limit of 5 tests per category
+            cur.execute("SELECT id, level_range, created_at, name FROM (SELECT t.id, r.level_range, r.created_at, c.name, ROW_NUMBER() OVER (PARTITION BY c.id ORDER BY r.created_at DESC) AS rn FROM tests t JOIN review_data r ON t.id = r.test_id JOIN categories c ON t.category_id = c.id WHERE t.user_id = %s) AS ranked WHERE rn <= 5 ORDER BY name, created_at DESC;", (session["user_id"],))
+            results = cur.fetchall()
+            tests = {}
 
+            for row in results:
+                category = row["name"]
+                
+                # Formatear fecha: "January 15, 2025"
+                date_str = row["created_at"].strftime("%B %d, %Y")  # Nota: %B da el mes en inglés
+                
+                # Formatear rango: [1, 3] → "1-3"
+                range_str = f"{row['level_range'][0]}-{row['level_range'][1]}"
+                
+                test_entry = {
+                    "id": row["id"],
+                    "date": date_str,
+                    "level_range": range_str
+                }
+
+                if category not in tests:
+                    tests[category] = []
+                
+                tests[category].append(test_entry)
+            
+            close_db(cur, conn)
+            return render_template("index.html", tests = tests)
+
+        close_db(cur, conn)
         return render_template("index.html")
     
     if request.method == "POST":
-        selected_test = request.form.getlist("tests")
+        selected_test = request.form.get("tests")
 
         # create session fields
-        session["tests"] = selected_test
-        session["finished_tests"] = []
+        session["test"] = selected_test
         session["question_num"] = 0
         session["used_levels"] = []
         session["new_question"] = True
@@ -64,16 +94,15 @@ def index():
 
         cur, conn = connect_db()
 
-        for category in selected_test:
-            session[f"{category}_beliefs"] = {i: 0.5 for i in range(1, 101)}
-            session[f"{category}_exploring"] = False
-            # Insert each test into tests
-            cur.execute("SELECT id FROM categories WHERE name = %s", (category,))
-            category_db = cur.fetchone()
-            cur.execute("INSERT INTO tests (user_id, category_id) VALUES (%s, %s) RETURNING id;", (session["user_id"], category_db["id"],))
-            test = cur.fetchone()
-            conn.commit()
-            session[f"{category}_test_id"] = test["id"]
+        session["beliefs"] = {i: 0.5 for i in range(1, 101)}
+        session["exploring"] = False
+        # Insert each test into tests
+        cur.execute("SELECT id FROM categories WHERE name = %s", (selected_test,))
+        category_db = cur.fetchone()
+        cur.execute("INSERT INTO tests (user_id, category_id) VALUES (%s, %s) RETURNING id;", (session["user_id"], category_db["id"],))
+        test = cur.fetchone()
+        conn.commit()
+        session["test_id"] = test["id"]
 
         close_db(cur, conn)
 
@@ -211,13 +240,13 @@ def register():
 @app.route("/skip", methods=["POST"])
 def skip():
     # Update beliefs based on failure (skip)
-    session[f"{session["question"]["category_name"]}_beliefs"] = update_beliefs(False, session["question"]["level"], session[f"{session["question"]["category_name"]}_beliefs"])
+    session["beliefs"] = update_beliefs(False, session["question"]["level"], session["beliefs"])
     session["question"]["user_answer"] = ""
     session["correct"] = False
     # Update user_answers
     cur, conn = connect_db()
 
-    cur.execute("INSERT INTO user_answers (question_id, is_correct, test_id) VALUES (%s, %s, %s);", (session["question"]["id"], False, session[f"{session["question"]["category_name"]}_test_id"]))
+    cur.execute("INSERT INTO user_answers (question_id, is_correct, test_id) VALUES (%s, %s, %s);", (session["question"]["id"], False, session["test_id"]))
     conn.commit()
 
     close_db(cur, conn)
@@ -238,20 +267,20 @@ def check():
         session["correct"] = True
         cur, conn = connect_db()
 
-        cur.execute("INSERT INTO user_answers (question_id, is_correct, test_id) VALUES (%s, %s, %s);", (session["question"]["id"], True, session[f"{session["question"]["category_name"]}_test_id"]))
+        cur.execute("INSERT INTO user_answers (question_id, is_correct, test_id) VALUES (%s, %s, %s);", (session["question"]["id"], True, session["test_id"]))
         conn.commit()
 
         close_db(cur, conn)
-        session[f"{session["question"]["category_name"]}_beliefs"] = update_beliefs(True, session["question"]["level"], session[f"{session["question"]["category_name"]}_beliefs"])
+        session["beliefs"] = update_beliefs(True, session["question"]["level"], session["beliefs"])
     else:
         print("INCORRECTO!!")
         session["correct"] = False
 
         cur, conn = connect_db()
-        cur.execute("INSERT INTO user_answers (question_id, is_correct, test_id) VALUES (%s, %s, %s);", (session["question"]["id"], False, session[f"{session["question"]["category_name"]}_test_id"]))
+        cur.execute("INSERT INTO user_answers (question_id, is_correct, test_id) VALUES (%s, %s, %s);", (session["question"]["id"], False, session["test_id"]))
         conn.commit()
         close_db(cur, conn)
-        session[f"{session["question"]["category_name"]}_beliefs"] = update_beliefs(False, session["question"]["level"], session[f"{session["question"]["category_name"]}_beliefs"])
+        session["beliefs"] = update_beliefs(False, session["question"]["level"], session["beliefs"])
 
     # Redirect to feedback
     return redirect(url_for("feedback"))
@@ -310,7 +339,7 @@ def feedback():
 def test():    
     # Set exploring to False if question number 0
     try:
-        exploring = session[f"{session['question']['category_name']}_exploring"]
+        exploring = session["exploring"]
     except: 
         exploring = False
 
@@ -318,56 +347,46 @@ def test():
         cur, conn = connect_db()
 
         # Prints
-        print_beliefs(session["trigonometry_beliefs"])
-        print(binary_entropy_dict(session["trigonometry_beliefs"]))
+        print_beliefs(session["beliefs"])
+        print(binary_entropy_dict(session["beliefs"]))
 
         session["new_question"] = False
 
-        # Determine random category
-        selected_tests = session.get("tests")
-        random_category = selected_tests[r.randint(0, len(selected_tests) - 1)] # MODIFICAR (usar random choice)
-
         if not exploring and session["question_num"] != 0:
             # Check if breaking point found
-            breaking_point = find_breaking_point(session[f"{session["question"]["category_name"]}_beliefs"])
+            breaking_point = find_breaking_point(session["beliefs"])
 
             if breaking_point:
                 print(f"breaking point found: {breaking_point}")
-                session[f"{session["question"]["category_name"]}_final_level"] = breaking_point
-                session[f"{session["question"]["category_name"]}_exploring"] = True
+                session["final_level"] = breaking_point
+                session["exploring"] = True
 
         # CHOOSE QUESTION
         if exploring == True:
-            user_level = session[f"{session["question"]["category_name"]}_final_level"]
-            chosen_lvl = choose_level_exploring(user_level, session["used_levels"], 7)
+            user_level = session["final_level"]
+            chosen_lvl = choose_level_exploring(user_level, session["used_levels"], EXPLORING_FACTOR)
             # If no more levels available (end of exploring)
             print(f"EXPLORING: question lvl {chosen_lvl}")
             if not chosen_lvl:
-                # add test to finished tests
-                session["finished_tests"].append(session["question"]["category_name"])
-
-                # remove test from tests
-                session["tests"].remove(session["question"]["category_name"])
-
                 # Update test as completed in db
-                cur.execute("UPDATE tests SET completed = %s WHERE user_id = %s AND id = %s;", (True, session["user_id"], session[f"{session["question"]["category_name"]}_test_id"],))
+                cur.execute("UPDATE tests SET completed = %s WHERE user_id = %s AND id = %s;", (True, session["user_id"], session["test_id"],))
                 conn.commit()
 
-                # Check if any tests left
-                if session["tests"] == []:
-                    close_db(cur, conn)
-                    return redirect(url_for("test_final"))
+                close_db(cur, conn)
+                return redirect(url_for("test_final"))
         else:
             # Choose question
-            chosen_lvl = choose_lvl(session[f"{random_category}_beliefs"], session["used_levels"])
+            chosen_lvl = choose_lvl(session["beliefs"], session["used_levels"])
 
         session["question_num"] += 1
         
         # Remember used_levels
         session["used_levels"].append(chosen_lvl)
 
+        print(f"chosen lvl = {chosen_lvl}")
+
         # Select random question from chosen level (every needed field)
-        cur.execute("SELECT questions.id, questions.level, questions.statement, questions.equation, questions.question, questions.image_url, questions.format_hint, questions.answer_txt, questions.calculator, categories.name AS category_name, question_types.name AS type_name FROM questions JOIN categories ON questions.category_id = categories.id JOIN question_types ON questions.type_id = question_types.id WHERE questions.level = %s AND categories.name = %s ORDER BY RANDOM() LIMIT 1;", (chosen_lvl, random_category,)) 
+        cur.execute("SELECT questions.id, questions.level, questions.statement, questions.equation, questions.question, questions.image_url, questions.format_hint, questions.answer_txt, questions.calculator, categories.name AS category_name, question_types.name AS type_name FROM questions JOIN categories ON questions.category_id = categories.id JOIN question_types ON questions.type_id = question_types.id WHERE questions.level = %s AND categories.name = %s ORDER BY RANDOM() LIMIT 1;", (chosen_lvl, session["test"],)) 
 
 
         session["question"] = cur.fetchone()
@@ -375,7 +394,7 @@ def test():
         # Update needed fields for selected type question
         if session["question"]["type_name"] == "nti":
 
-            session["question"]["answer_txt_nti"] = session["question"]["answer_txt"].replace("__", "<input form='answer_form' type='text' name='answer' class='answer-input' maxlength='15' autocomplete='off'>")
+            session["question"]["answer_txt_nti"] = session["question"]["answer_txt"].replace("__", "<input form='answer_form' type='text' name='answer' class='answer-input' maxlength='15' autocomplete='off' required>")
             cur.execute("SELECT answer FROM answers WHERE question_id = %s", (session["question"]["id"],))
             correct_answer = cur.fetchone()
             session["question"]["correct_answer"] = correct_answer["answer"]
@@ -427,7 +446,169 @@ def test():
                             question=session["question"],
                             username=session["username"],
                             )
+    
         
+@app.route("/test_final", methods=["GET"])
+def test_final():
+    estimated_level = (session['final_level'].stop + session['final_level'].start) / 2
+    summary_text = get_level_summary(estimated_level)
+
+    plot_data = plot_beliefs(session["beliefs"])
+
+    extended_min = max(session['final_level'].start - 15, 0)
+    extended_max = min(session['final_level'].stop + 15, 100)
+    cur, conn = connect_db()
+    cur.execute("SELECT user_answers.id, user_answers.is_correct, subjects.name AS subject_name FROM user_answers JOIN questions ON user_answers.question_id = questions.id JOIN subjects ON questions.subject_id = subjects.id WHERE user_answers.test_id = %s AND questions.level > %s AND questions.level < %s", (session["test_id"], extended_min, extended_max,))
+    user_answers = cur.fetchall()
+    counts = {}
+    for answer in user_answers:
+        subject = answer["subject_name"]
+        is_correct = answer["is_correct"]
+
+        if subject not in counts:
+            counts[subject] = {"total": 0, "correct": 0}
+        counts[subject]["total"] += 1
+        counts[subject]["correct"] += int(is_correct)
+
+    final_result = {}
+    weaknesses = []
+    strengths = []
+    for subject, stats in counts.items():
+        total = stats["total"]
+        correct = stats["correct"]
+
+        ratio = correct / total
+        if ratio < 0.7:
+            classification = "weakness"
+        elif ratio == 1.0:
+            classification = "strength"
+        else:
+            classification = "neutral"
+
+        final_result[subject] = classification
+
+        if final_result[subject] == "weakness":
+            weaknesses.append(subject)
+        elif final_result[subject] == "strength":
+            strengths.append(subject)
+            
+    final_weak_materials = []
+    if weaknesses:
+        weak_placeholders = ', '.join(['%s'] * len(weaknesses))
+        weak_query = f"SELECT m.title, m.url, m.summary, s.name FROM materials m JOIN subjects_materials sm ON m.id = sm.material_id JOIN subjects s ON sm.subject_id = s.id WHERE s.name IN ({weak_placeholders}) AND %s BETWEEN m.level_start AND m.level_stop"
+        params = weaknesses + [estimated_level]
+        
+        cur.execute(weak_query, params)
+        weak_materials = cur.fetchall()
+
+        weak_subject_map = {}
+
+        for row in weak_materials:
+            subject_name = row["name"]  # 'name' de la consulta, es el subject
+            material_info = {
+                "title": row["title"],
+                "url": row["url"],
+                "summary": row["summary"]
+            }
+
+            if subject_name not in weak_subject_map:
+                # Crear nueva entrada
+                subject_entry = {
+                    "subject": subject_name,
+                    "materials": [material_info]
+                }
+                final_weak_materials.append(subject_entry)
+                weak_subject_map[subject_name] = subject_entry
+            else:
+                # Agregar material a la entrada existente
+                weak_subject_map[subject_name]["materials"].append(material_info)
+
+    final_strong_materials = []
+    if strengths:
+        strong_placeholders = ', '.join(['%s'] * len(strengths))
+
+        strong_query = f"SELECT m.title, m.url, m.summary, s.name FROM materials m JOIN subjects_materials sm ON m.id = sm.material_id JOIN subjects s ON sm.subject_id = s.id WHERE s.name IN ({strong_placeholders}) AND %s BETWEEN m.level_start AND m.level_stop"
+
+        params = strengths + [estimated_level]
+        cur.execute(strong_query, params)
+        strong_materials = cur.fetchall()
+
+        strong_subject_map = {}
+
+        for row in strong_materials:
+            subject_name = row["name"]  # 'name' de la consulta, es el subject
+            material_info = {
+                "title": row["title"],
+                "url": row["url"],
+                "summary": row["summary"]
+            }
+
+            if subject_name not in strong_subject_map:
+                # Crear nueva entrada
+                subject_entry = {
+                    "subject": subject_name,
+                    "materials": [material_info]
+                }
+                final_strong_materials.append(subject_entry)
+                strong_subject_map[subject_name] = subject_entry
+            else:
+                # Agregar material a la entrada existente
+                strong_subject_map[subject_name]["materials"].append(material_info)
+
+    session["weaknesses"] = final_weak_materials
+    session["strengths"] = final_strong_materials
+    session["summary_text"] = summary_text
+
+    json_weaknesses = json.dumps(session["weaknesses"])
+    json_strengths = json.dumps(session["strengths"])
+    json_beliefs = json.dumps(session["beliefs"])
+
+
+    session["plot_data"] = plot_data
+
+    level_range = [session["final_level"].start, session["final_level"].stop]
+
+    cur.execute("INSERT INTO review_data (test_id, level_range, weaknesses, strengths, beliefs) VALUES (%s, %s, %s, %s, %s)", (session["test_id"], level_range, json_weaknesses, json_strengths, json_beliefs,))
+    conn.commit()
+
+    close_db(cur, conn) 
+    return redirect(url_for("review"))
+
+    
+
+@app.route("/review", methods=["GET"])
+def review():
+    return render_template("review.html", 
+                           final_level_start = session["final_level"].start,
+                           final_level_stop = session["final_level"].stop,
+                           weaknesses = session["weaknesses"],
+                           strengths = session["strengths"],
+                           summary_text = session["summary_text"],
+                           plot_data = session["plot_data"],
+                           username= session["username"],
+                           )
+
+@app.route("/review/test/<int:test_id>")
+def review_test(test_id):
+    cur, conn = connect_db()
+    cur.execute("SELECT level_range, weaknesses, strengths, beliefs FROM review_data WHERE test_id = %s", (test_id,))
+    results = cur.fetchone()
+
+    session["final_level"] = range(results["level_range"][0], results["level_range"][1])
+    session["weaknesses"] = results["weaknesses"]
+    session["strengths"] = results["strengths"]
+
+    estimated_level = (session['final_level'].start + session['final_level'].stop) / 2
+
+    session["summary_text"] = get_level_summary(estimated_level)
+
+    results["beliefs"] = {int(k): v for k, v in results["beliefs"].items()}
+
+
+    session["plot_data"] = plot_beliefs(results["beliefs"])
+
+    return redirect(url_for("review"))
+
 
 
 @app.route("/exit-test", methods=["POST"])
@@ -435,32 +616,21 @@ def exit_test():
     if "question" in session:
         del session["question"]
     if "tests" in session:
-        del session["tests"]
+        del session["test"]
     if "question_num" in session:
         del session["question_num"]
     if "used_levels" in session:
         del session["used_levels"]
-    if "finished_tests" in session:
-        del session["finished_tests"]
-
-    for category in CATEGORIES:
-        if f"{category}_beliefs" in session:
-            del session[f"{category}_beliefs"]
-
-        if f"{category}_final_level" in session:
-            del session[f"{category}_final_level"]
-
-        if f"{category}_test_id" in session:
-            del session[f"{category}_test_id"]
-
+    if "test_id" in session:
+        del session["test_id"]
+    if "final_level" in session:
+            del session["final_level"]
+    if "beliefs" in session:
+        del session["beliefs"]
 
     return redirect(url_for("index"))
 
-@app.route("/test_final", methods=["GET"])
-def test_final():
-    return render_template("review.html", 
-                           trigonometry_final_level = session["trigonometry_final_level"],
-                           question_num = session["question_num"])
+
 
 
 
