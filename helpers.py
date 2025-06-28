@@ -189,7 +189,7 @@ def find_breaking_point(my_dict):
     # Check last 5
     for i in range(100, 94, -1):
         average = np.mean([my_dict[i], my_dict[i-1]])
-        if average >= 0.75: return i
+        if average >= 0.75: return range(95, 100)
     
     # Check all middle levels
     for i in range(len(levels) - 5):

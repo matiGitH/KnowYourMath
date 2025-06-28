@@ -504,7 +504,7 @@ def test_final():
         weak_subject_map = {}
 
         for row in weak_materials:
-            subject_name = row["name"]  # 'name' de la consulta, es el subject
+            subject_name = row["name"]
             material_info = {
                 "title": row["title"],
                 "url": row["url"],
@@ -527,9 +527,9 @@ def test_final():
     if strengths:
         strong_placeholders = ', '.join(['%s'] * len(strengths))
 
-        strong_query = f"SELECT m.title, m.url, m.summary, s.name FROM materials m JOIN subjects_materials sm ON m.id = sm.material_id JOIN subjects s ON sm.subject_id = s.id WHERE s.name IN ({strong_placeholders}) AND %s BETWEEN m.level_start AND m.level_stop"
+        strong_query = f"SELECT m.title, m.url, m.summary, s.name FROM materials m JOIN subjects_materials sm ON m.id = sm.material_id JOIN subjects s ON sm.subject_id = s.id WHERE s.name IN ({strong_placeholders})"
 
-        params = strengths + [estimated_level]
+        params = strengths
         cur.execute(strong_query, params)
         strong_materials = cur.fetchall()
 

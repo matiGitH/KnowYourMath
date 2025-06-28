@@ -289,7 +289,6 @@ footer {
 /* Texto respuesta */
 .answer-text {
     font-size: 18px;
-    color: #333;
 }
 
 /* Imagen respuesta */
@@ -433,7 +432,8 @@ footer {
     align-items: center;
     padding: 12px 20px;
     margin-bottom: 15px;
-    background-color: #FF474C;
+    background-color: #ffc1c1;
+    color: rgba(28, 29, 30, 0.9);
     border-radius: 10px;
     cursor: pointer;
     transition: background-color 0.3s;
@@ -442,15 +442,18 @@ footer {
 }
 
 .option-container-mcma-feedback.correct{
-    background-color: lightgreen;
+    background-color: #ACF3A3;
+    color: rgba(28, 29, 30, 0.9);
 }
 
 .option-container-mcma-feedback.correct.selected{
-    background-color: green;
+    background-color: #48E164;
+    color: black;
 }
 
 .option-container-mcma-feedback.selected{
-    background-color: red;
+    background-color: rgba(255, 90, 90, 0.6);
+    color: black;
 }
 
 .option-container-mcma-feedback input[type="radio"],
@@ -467,8 +470,9 @@ footer {
     transition: background-color 0.3s;
 }
 
+/* Background color for selected icon mc */
 .option-container-mcma-feedback input[type="radio"]:checked + .custom-radio-feedback {
-    background-color: #ff6200;
+    background-color: #4a90e2;
 }
 
 /* MA checkbox */
@@ -500,8 +504,9 @@ footer {
     opacity: 1;
 }
 
+/* Background color for selected icon ma */
 .option-container-mcma-feedback input[type="checkbox"]:checked + .custom-checkbox-feedback {
-    background-color: #ff6200;
+    background-color: #4a90e2;
 }
 
 .answer-select.correct {
@@ -516,4 +521,18 @@ footer {
     color: red;
     opacity: 1;
     cursor: auto;
+}
+
+/* Shake effect */
+@keyframes shake {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-6px); }
+  80% { transform: translateX(6px); }
+  100% { transform: translateX(0); }
+}
+
+.shake {
+  animation: shake 0.5s ease-in-out;
 }

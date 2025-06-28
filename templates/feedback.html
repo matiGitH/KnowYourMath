@@ -7,6 +7,7 @@
 {% block css %}
     <!-- styles.css link -->
     <link rel="stylesheet" href="{{ url_for('static', filename='test.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 {% endblock %}
 
 {% block js %}
@@ -26,6 +27,69 @@
             }
         };
     </script>
+    {% if correct %}
+    <audio id="successSound" src="{{ url_for('static', filename='sounds/success.mp3') }}"></audio>
+    <script>
+        // Success sound (with decreased volume)
+        const sound = document.getElementById("successSound");
+        sound.volume = 0.4;
+        sound.play();
+        // Función para disparar confetti
+        var count = 200;
+        var defaults = {
+            origin: { y: 0.7 }
+        };
+
+        function fire(particleRatio, opts) {
+            confetti({
+            ...defaults,
+            ...opts,
+            particleCount: Math.floor(count * particleRatio)
+            });
+        }
+
+        // Ejecutar confetti al cargar
+        window.onload = function () {
+            fire(0.25, {
+            spread: 26,
+            startVelocity: 55,
+            });
+            fire(0.2, {
+            spread: 60,
+            });
+            fire(0.35, {
+            spread: 100,
+            decay: 0.91,
+            scalar: 0.8
+            });
+            fire(0.1, {
+            spread: 120,
+            startVelocity: 25,
+            decay: 0.92,
+            scalar: 1.2
+            });
+            fire(0.1, {
+            spread: 120,
+            startVelocity: 45,
+            });
+        };
+    </script>
+    {% else %}
+    <audio id="errorSound" src="{{ url_for('static', filename='sounds/error.mp3') }}"></audio>
+    <script>
+        // Error sound (with 0.4 volume)
+        const sound = document.getElementById("errorSound");
+        sound.volume = 0.4;
+        sound.play();
+
+        window.onload = function () {
+
+        const target = document.body;
+        target.classList.add("shake");
+        };
+    </script>
+    {% endif %}
+
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
 {% endblock %}
 

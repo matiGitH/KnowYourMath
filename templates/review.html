@@ -43,6 +43,9 @@
         <h1>Weaknesses</h1>
         <p>Take a look at the subjects you struggled the most with and strengthen your knowledge through the suggested
             resources.</p>
+        {% if weaknesses == [] %}
+        <p class="no-attributes-message">No weaknesses detected. Are you sure you're not the developer?</p>
+        {% endif %}
         {% for weakness in weaknesses %}
             <div class="topic">
                 <div class="topic-header" onclick="toggleTopic(this)">{{ weakness.subject }}</div>
@@ -61,7 +64,9 @@
         <h1>Strengths</h1>
         <p>Here you'll find the subjects you aced, showing complete domain. Don't worry, you won't need any of the study
             material for these.</p>
-        <!-- Ouch! You don't have any strengths yet... You better focus on those weaknesses! -->
+        {% if strengths == [] %}
+        <p class="no-attributes-message">Ouch! You don't have any strengths yet... You better focus on those weaknesses and remember, every expert was once a beginner!</p>
+        {% endif %}
         {% for strength in strengths %}
             <div class="topic">
                 <div class="topic-header" onclick="toggleTopic(this)">{{ strength.subject }}</div>

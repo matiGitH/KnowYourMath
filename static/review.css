@@ -239,3 +239,9 @@ section {
 .return-button:hover {
   background-color: #e35700;
 }
+
+.no-attributes-message {
+  margin-top: 3rem;
+  font-size: 1.2rem;
+  font-weight: 800;
+}
