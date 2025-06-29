@@ -491,7 +491,34 @@ def test_final():
             weaknesses.append(subject)
         elif final_result[subject] == "strength":
             strengths.append(subject)
-            
+    
+    cur.execute("SELECT user_answers.id, user_answers.is_correct, subjects.name AS subject_name FROM user_answers JOIN questions ON user_answers.question_id = questions.id JOIN subjects ON questions.subject_id = subjects.id WHERE user_answers.test_id = %s", (session["test_id"],))
+    user_answers = cur.fetchall()
+    counts = {}
+    for answer in user_answers:
+        subject = answer["subject_name"]
+        is_correct = answer["is_correct"]
+
+        if subject not in counts:
+            counts[subject] = {"total": 0, "correct": 0}
+        counts[subject]["total"] += 1
+        counts[subject]["correct"] += int(is_correct)
+
+    for subject, stats in counts.items():
+        total = stats["total"]
+        correct = stats["correct"]
+
+        ratio = correct / total
+        if ratio == 1.0:
+            classification = "strength"
+        else:
+            classification = "neutral"
+
+        final_result[subject] = classification
+
+        if final_result[subject] == "strength" and subject not in strengths:
+            strengths.append(subject)
+
     final_weak_materials = []
     if weaknesses:
         weak_placeholders = ', '.join(['%s'] * len(weaknesses))
