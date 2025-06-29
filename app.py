@@ -492,6 +492,7 @@ def test_final():
         elif final_result[subject] == "strength":
             strengths.append(subject)
     
+    # Add missing strengths
     cur.execute("SELECT user_answers.id, user_answers.is_correct, subjects.name AS subject_name FROM user_answers JOIN questions ON user_answers.question_id = questions.id JOIN subjects ON questions.subject_id = subjects.id WHERE user_answers.test_id = %s", (session["test_id"],))
     user_answers = cur.fetchall()
     counts = {}
