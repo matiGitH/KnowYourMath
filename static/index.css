@@ -47,7 +47,60 @@
 html {
     scroll-behavior: smooth;
 }
-  
+
+.hidden {
+    display: none !important;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+
+.alert-box {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    background-color: var(--orange);
+    color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    text-align: center;
+    height: 35vh;
+    width: 30vw;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    font-size: 1.1rem;
+    font-family: 'Poppins', sans-serif;
+    z-index: 1001;
+}
+
+.alert-box button {
+    margin: 2rem 0.5rem 0.5rem 0.5rem;
+    padding: 0.8rem 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    border: none;
+    font-size: 1rem;
+    font-family: 'Poppins', sans-serif;
+}
+
+.cancel {
+    background-color: var(--dark-gray);
+    color: var(--orange);
+}
+
+.cancel:hover {
+    color: white;
+}
 
 * {
     margin: 0;
@@ -142,7 +195,7 @@ li {
     justify-content: space-around;
 }
 
-.nav.hidden {
+.nav-hidden {
     transform: translateY(-100%);
 }
 
@@ -379,7 +432,7 @@ svg {
     text-align: center;
 }
 
-button {
+.button {
     padding: 1rem 2rem;
     font-size: 1.1rem;
     border: none;
@@ -394,12 +447,12 @@ button {
 
 }
 
-button.enabled {
+.button.enabled {
     opacity: 1;
     pointer-events: auto;
 }
 
-button.enabled:hover {
+.button.enabled:hover {
     color: white;
     background-color: #ff6200;
 }
@@ -430,7 +483,6 @@ button.enabled:hover {
 
 .progress-section {
     max-width: 80vw;
-    height: 100vh;
     overflow-y: auto;
     background-color: white;
     display: unset;
@@ -439,6 +491,16 @@ button.enabled:hover {
 .progress-section h1 {
     text-align: center;
     margin-bottom: 2rem;
+}
+
+.progress-section.not-logged-progress {
+    display: flex;
+    justify-content: center;
+    line-height: 22rem;
+    font-size: 2rem;
+    font-weight: 700;
+    height: 60vh;
+    width: 100vw;
 }
 
 .accordion {

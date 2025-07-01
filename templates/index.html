@@ -20,6 +20,7 @@
 
 <body>
   {% block main %}
+  <div id="app" data-logged-in="{{ 'true' if 'user_id' in session else 'false' }}"></div>
   <nav class="nav">
     <div class="nav-left">
       <div class="nav-home">
@@ -45,6 +46,15 @@
       </div>
     </div>
   </nav>
+  <div id="customAlert" class="overlay hidden">
+    <div class="alert-box">
+      <h3>Sorry!</h3>
+      <p>You must be logged in to select a test.</p>
+      <form>
+        <button type="button" class="cancel" id="cancelAlert">Cancel</button>
+      </form>
+    </div>
+  </div>
 
   <section class="intro-section">
     <div class="wave-intro">
@@ -120,7 +130,7 @@
       </div>
     </div>
     <div class="submit-container animate-fade-in">
-      <button id="submitBtn" type="submit">Confirm</button>
+      <button class="button" id="submitBtn" type="submit">Confirm</button>
     </div>
   </form>
       <!-- Separador entre tests y progreso -->
@@ -134,7 +144,7 @@
       
       <section id="progress" class="progress-section">
         {% if "user_id" not in session %}
-        <p>Please log in to view your progress.</p>
+        <span class="not-logged-progress">Please log in to view your progress.</span>
       
         {% else %}
           <h1>Your Test History</h1>

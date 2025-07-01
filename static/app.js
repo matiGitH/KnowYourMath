@@ -13,9 +13,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const currentScroll = window.pageYOffset;
 
         if (currentScroll > lastScroll) {
-            header.classList.add('hidden');
+            header.classList.add('nav-hidden');
         } else {
-            header.classList.remove('hidden');
+            header.classList.remove('nav-hidden');
         }
 
         lastScroll = currentScroll;
@@ -27,44 +27,55 @@ const submitBtn = document.getElementById('submitBtn');
 const form = document.querySelector('.tests-select');
 let selected = null;
 
-panels.forEach(panel => {
-  panel.addEventListener('click', () => {
-    const test = panel.dataset.title;
+// Verificación previa
+const LOGGED_IN = document.getElementById('app').dataset.loggedIn === "true";
 
-    // Si se hace clic en la ya seleccionada, la deselecciona
-    if (selected === panel) {
-      panel.classList.remove('selected');
-      selected = null;
-    } else {
-      // Deseleccionar todos
-      panels.forEach(p => p.classList.remove('selected'));
+document.addEventListener("DOMContentLoaded", () => {
+  const alertBox = document.getElementById("customAlert");
+  const cancelBtn = document.getElementById("cancelAlert");
 
-      // Seleccionar el nuevo
-      panel.classList.add('selected');
-      selected = panel;
+  cancelBtn.addEventListener("click", () => {
+    alertBox.classList.add("hidden");
+  });
+
+  panels.forEach(panel => {
+    panel.addEventListener('click', () => {
+      if (!LOGGED_IN) {
+        alertBox.classList.remove("hidden"); // Mostrar alerta
+        return;
+      }
+
+      const test = panel.dataset.title;
+
+      if (selected === panel) {
+        panel.classList.remove('selected');
+        selected = null;
+      } else {
+        panels.forEach(p => p.classList.remove('selected'));
+        panel.classList.add('selected');
+        selected = panel;
+      }
+
+      submitBtn.classList.toggle('enabled', selected !== null);
+    });
+  });
+
+  form.addEventListener('submit', (e) => {
+    if (!selected) {
+      e.preventDefault();
+      return;
     }
 
-    // Habilitar o deshabilitar el botón
-    submitBtn.classList.toggle('enabled', selected !== null);
+    document.querySelectorAll('input[name="tests"]').forEach(input => input.remove());
+
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'tests';
+    input.value = selected.dataset.title.toLowerCase();
+    form.appendChild(input);
   });
 });
 
-form.addEventListener('submit', (e) => {
-  if (!selected) {
-    e.preventDefault();
-    return;
-  }
-
-  // Limpiar inputs anteriores
-  document.querySelectorAll('input[name="tests"]').forEach(input => input.remove());
-
-  // Agregar el único input seleccionado
-  const input = document.createElement('input');
-  input.type = 'hidden';
-  input.name = 'tests';
-  input.value = selected.dataset.title.toLowerCase();
-  form.appendChild(input);
-});
 
 
 
@@ -112,7 +123,6 @@ function updateVisibleText() {
     if (!visibleSlide) return;
 
     const currentQuestion = visibleSlide.getAttribute('data-question');
-    console.log(`Ahora está la pregunta ${currentQuestion}`);
 
     const allTexts = document.querySelectorAll('.question-text');
     const currentTexts = document.querySelectorAll(`.question-text[data-for="${currentQuestion}"]`);
@@ -169,3 +179,6 @@ headers.forEach(header => {
     }
   });
 });
+
+
+

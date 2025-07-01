@@ -42,6 +42,26 @@ def after_request(response):
 def index():
     if request.method == "GET":
 
+        # Clean session
+        if "test" in session:
+            del session["test"]
+        if "question" in session:
+            del session["question"]
+        if "tests" in session:
+            del session["test"]
+        if "question_num" in session:
+            del session["question_num"]
+        if "used_levels" in session:
+            del session["used_levels"]
+        if "test_id" in session:
+            del session["test_id"]
+        if "final_level" in session:
+            del session["final_level"]
+        if "beliefs" in session:
+            del session["beliefs"]
+        if "review" in session:
+            del session["review"]
+
         # Clean incomplete TESTS
         cur, conn = connect_db()
 
@@ -78,7 +98,7 @@ def index():
             
             close_db(cur, conn)
             return render_template("index.html", tests = tests)
-
+        
         close_db(cur, conn)
         return render_template("index.html")
     
@@ -90,6 +110,7 @@ def index():
         session["question_num"] = 0
         session["used_levels"] = []
         session["new_question"] = True
+        session["test_page"] = True
         session["correct_answers"] = []
 
         cur, conn = connect_db()
@@ -250,6 +271,8 @@ def skip():
     conn.commit()
 
     close_db(cur, conn)
+
+    session["test_page"] = False
     return redirect(url_for("feedback"))
 
         
@@ -263,7 +286,6 @@ def check():
         result = validate_answer(session["question"]["user_answer"], session["question"]["id"])
 
     if result:
-        print("CORRECTO!!")
         session["correct"] = True
         cur, conn = connect_db()
 
@@ -273,7 +295,6 @@ def check():
         close_db(cur, conn)
         session["beliefs"] = update_beliefs(True, session["question"]["level"], session["beliefs"])
     else:
-        print("INCORRECTO!!")
         session["correct"] = False
 
         cur, conn = connect_db()
@@ -282,6 +303,7 @@ def check():
         close_db(cur, conn)
         session["beliefs"] = update_beliefs(False, session["question"]["level"], session["beliefs"])
 
+    session["test_page"] = False
     # Redirect to feedback
     return redirect(url_for("feedback"))
     
@@ -290,14 +312,22 @@ def check():
 def feedback():
     if request.method == "POST":
         session["new_question"] = True
+        session["test_page"] = True
         return redirect(url_for("test"))
     elif request.method == "GET":
+        # If accessed illegaly
+        if not "test" in session:
+            return render_template("error.html")
+        if session["test_page"]:
+            session["new_question"] = False
+            return redirect(url_for("test"))
+
         if session["question"]["type_name"] == "nti":
             if session["correct"]:
                 session["question"]["answer_txt"] = session["question"]["answer_txt"].replace("__", f"<input type='text' name='answer' class='answer-input' value='{session["question"]["user_answer"]}' style='color: green; background-color: #d4edda; border: 1px solid #28a745;' autocomplete='off' disabled>")
             else:
                 # Show correct answer
-                session["question"]["correct_answer_txt"] = session["question"]["answer_txt"].replace("__", f"\\( {session['question']['correct_answer']} \\)")
+                session["question"]["correct_answer_txt"] = session["question"]["answer_txt_original"].replace("__", f"\\( {session['question']['correct_answer']} \\)")
                 # Show user's answer (wrong)
                 session["question"]["answer_txt"] = session["question"]["answer_txt"].replace("__", f"<input type='text' name='answer' class='answer-input' value='{session["question"]["user_answer"]}' style='color: red; background-color: #f8d7da; border: 1px solid #dc3545;' autocomplete='off' disabled>")
 
@@ -337,20 +367,25 @@ def feedback():
 
 @app.route("/test", methods=["GET"])
 def test():    
-    # Set exploring to False if question number 0
-    try:
-        exploring = session["exploring"]
-    except: 
-        exploring = False
+    if not "test" in session:
+        return render_template("error.html")
+    
+    if not session["test_page"]:
+        return redirect(url_for("feedback"))
 
     if session["new_question"]:
+        session["new_question"] = False
+
+        # Set exploring to False if question number 0
+        try:
+            exploring = session["exploring"]
+        except: 
+            exploring = False
         cur, conn = connect_db()
 
         # Prints
         print_beliefs(session["beliefs"])
         print(binary_entropy_dict(session["beliefs"]))
-
-        session["new_question"] = False
 
         if not exploring and session["question_num"] != 0:
             # Check if breaking point found
@@ -398,6 +433,7 @@ def test():
             cur.execute("SELECT answer FROM answers WHERE question_id = %s", (session["question"]["id"],))
             correct_answer = cur.fetchone()
             session["question"]["correct_answer"] = correct_answer["answer"]
+            session["question"]["answer_txt_original"] = session["question"]["answer_txt"]
             
         elif session["question"]["type_name"] == "mc" or session["question"]["type_name"] == "ma":
 
@@ -439,7 +475,7 @@ def test():
                             question=session["question"],
                             username=session["username"],
                             )
-
+    
     else:
         # Return same question               
         return render_template("test.html",
@@ -600,12 +636,20 @@ def test_final():
     conn.commit()
 
     close_db(cur, conn) 
+    session["review"] = True
+    if "test" in session:
+        del session["test"]
     return redirect(url_for("review"))
 
     
 
 @app.route("/review", methods=["GET"])
 def review():
+    if not "test" in session:
+        return render_template("error.html", error_title = "No active test found", error_message = "You accessed this page without selecting a test first. Please go back to the homepage and choose one to begin.")
+    if not "review" in session or not session["review"]:
+        return render_template("error.html", error_title = "You haven't finished your test yet", error_message = "To see your performance review, you need to complete the test first. Please return and finish the test to unlock your results.")
+    print(session["review"])
     return render_template("review.html", 
                            final_level_start = session["final_level"].start,
                            final_level_stop = session["final_level"].stop,
@@ -632,32 +676,12 @@ def review_test(test_id):
 
     results["beliefs"] = {int(k): v for k, v in results["beliefs"].items()}
 
-
     session["plot_data"] = plot_beliefs(results["beliefs"])
 
+    session["review"] = True
+    session["test"] = True
+    close_db(cur, conn)
     return redirect(url_for("review"))
-
-
-
-@app.route("/exit-test", methods=["POST"])
-def exit_test():
-    if "question" in session:
-        del session["question"]
-    if "tests" in session:
-        del session["test"]
-    if "question_num" in session:
-        del session["question_num"]
-    if "used_levels" in session:
-        del session["used_levels"]
-    if "test_id" in session:
-        del session["test_id"]
-    if "final_level" in session:
-            del session["final_level"]
-    if "beliefs" in session:
-        del session["beliefs"]
-
-    return redirect(url_for("index"))
-
 
 
 

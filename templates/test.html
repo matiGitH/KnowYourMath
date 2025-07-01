@@ -33,12 +33,10 @@
 {% block main %}
     <nav class="nav">
         <div class="nav-home">
-            <form id="exit" action="/exit-test" method="post"></form>
-            <input form="exit" type="hidden">
-            <button form="exit">KnowYourMath</button>
+            <a class="exit-button" href="/">KnowYourMath</a>
         </div>
         <div class="nav-session">
-            <a href="">{{ username }}</a>
+            <a>{{ username }}</a>
         </div>
         </div>
     </nav>

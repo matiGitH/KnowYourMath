@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>No Active Test</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #ffffff;
+      color: #1c1d1e;
+      font-family: "Segoe UI", sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .error-code {
+      font-size: 7rem;
+      font-weight: bold;
+      color: #ff6200;
+      margin: 0;
+    }
+
+    .error-message {
+      font-size: 1.7rem;
+      margin: 1rem 0 0.5rem 0;
+    }
+
+    .error-description {
+      font-size: 1rem;
+      color: #555;
+      max-width: 420px;
+      margin-bottom: 2rem;
+    }
+
+    .home-button {
+      background-color: #ff6200;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .home-button:hover {
+      background-color: #e55a00;
+    }
+  </style>
+</head>
+<body>
+  <h1 class="error-code">Oops!</h1>
+  <div class="error-message">{{ error_title }}</div>
+  <p class="error-description">{{ error-message }}</p>
+  <a href="/" class="home-button">Back to Homepage</a>
+</body>
+</html>
