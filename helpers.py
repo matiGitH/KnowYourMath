@@ -278,12 +278,12 @@ def get_level_summary(level):
     else:
         return LEVEL_SUMMARIES["81-100"]
 
-def plot_beliefs(beliefs_dict):
+def plot_beliefs_svg(beliefs_dict):
     # Crear figura
-    fig, ax = plt.subplots(figsize=(10, 4))
+    fig, ax = plt.subplots(figsize=(5, 4))
     levels = list(beliefs_dict.keys())
     probs = list(beliefs_dict.values())
-    
+
     ax.plot(levels, probs, color='orange')
     ax.set_xlabel("Question's level")
     ax.set_ylabel("Success probability")
@@ -291,12 +291,13 @@ def plot_beliefs(beliefs_dict):
     ax.grid(True)
     ax.set_ylim(0, 1)
 
-    # Guardar en memoria
+    # Guardar como SVG en memoria
     img = io.BytesIO()
-    plt.savefig(img, format='png')
+    plt.savefig(img, format='svg')
     plt.close(fig)
     img.seek(0)
-    # Codificar en base64
-    plot_url = base64.b64encode(img.getvalue()).decode('utf8')
-    return plot_url
+
+    # Devolver el SVG como string
+    return img.getvalue().decode('utf-8')
+
 

@@ -260,14 +260,32 @@ li {
 }
 
 #intro-right {
-    position: absolute;
-    top: 10vh;
-    right: 4vw;
-    width: 35vw;
-    height: 70vh;
+    position: fixed;
+    top: 7vh;
+    right: 13vw;
+    width: 18vw;
+    height: 80vh;
     border-radius: 40px;
     overflow: hidden;
+    z-index: 1;
 }
+
+.demo-video-wrapper {
+    width: 100%;
+    align-self: center;
+    max-width: 380px;        /* ajusta al ancho que desees */
+    margin-inline: auto;     /* centra horizontalmente */
+    border-radius: 16px;     /* opcional: esquinas redondeadas */
+    overflow: hidden;        /* evita que el video se salga del borde */
+}
+
+.demo-video {
+    width: 100%;
+    height: auto;            /* mantiene proporción vertical */
+    object-fit: cover;       /* recorta suavemente si hace falta */
+}
+
+
 .intro-bars {
     position: absolute;
     bottom: 0;
@@ -457,6 +475,13 @@ svg {
     background-color: #ff6200;
 }
 
+.button.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+
 .test-panel:hover::after {
     opacity: 1;
     transform: translateY(0);
@@ -493,7 +518,7 @@ svg {
     margin-bottom: 2rem;
 }
 
-.progress-section.not-logged-progress {
+.not-logged-progress {
     display: flex;
     justify-content: center;
     line-height: 22rem;
@@ -731,3 +756,4 @@ footer {
     transform: scale(1.3);
     color: #cc4e00;
 }
+

@@ -66,8 +66,14 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    // Prevent múltiple submits
+    submitBtn.disabled = true;
+    submitBtn.classList.add('disabled');
+
+    // Eliminate previous inputs
     document.querySelectorAll('input[name="tests"]').forEach(input => input.remove());
 
+    // Create hidden input
     const input = document.createElement('input');
     input.type = 'hidden';
     input.name = 'tests';
@@ -75,10 +81,6 @@ document.addEventListener("DOMContentLoaded", () => {
     form.appendChild(input);
   });
 });
-
-
-
-
 
 // Animation on scroll when visible
 document.addEventListener("DOMContentLoaded", () => {

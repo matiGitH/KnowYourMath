@@ -9,7 +9,7 @@ from flask_session import Session
 from dotenv import load_dotenv
 import random as r
 
-from helpers import login_required, connect_db, close_db, binary_entropy_dict, validate_answer, print_beliefs, choose_lvl, update_beliefs, find_breaking_point, choose_level_exploring, get_level_summary, plot_beliefs
+from helpers import login_required, connect_db, close_db, binary_entropy_dict, validate_answer, print_beliefs, choose_lvl, update_beliefs, find_breaking_point, choose_level_exploring, get_level_summary, plot_beliefs_svg
 
 CATEGORIES = ["trigonometry","algebra","statistics","calculus"]
 
@@ -40,6 +40,7 @@ def after_request(response):
 
 @app.route("/", methods=["GET", "POST"])
 def index():
+    print("ejecutando index")
     if request.method == "GET":
 
         # Clean session
@@ -62,15 +63,20 @@ def index():
         if "review" in session:
             del session["review"]
 
-        # Clean incomplete TESTS
+        # Clean timeout TESTS
         cur, conn = connect_db()
 
-        cur.execute("DELETE FROM user_answers WHERE test_id IN (SELECT id FROM tests WHERE completed = false);")
-        cur.execute("DELETE FROM tests WHERE completed = false;")
+        cur.execute("DELETE FROM user_answers WHERE test_id IN (SELECT id FROM tests WHERE completed = false AND started_at <= NOW() - INTERVAL '3 hours');")
+        cur.execute("DELETE FROM tests WHERE completed = false AND started_at <= NOW() - INTERVAL '3 hours';")
         conn.commit()
 
         # Progress section data
         if "user_id" in session:
+            # Clean user's tests
+            cur.execute("DELETE FROM user_answers WHERE test_id IN (SELECT id FROM tests WHERE completed = false AND user_id = %s);", (session["user_id"],))
+            cur.execute("DELETE FROM tests WHERE completed = false AND user_id = %s;", (session["user_id"],))
+            conn.commit()
+            
             # Returns all tests completed by the user with a limit of 5 tests per category
             cur.execute("SELECT id, level_range, created_at, name FROM (SELECT t.id, r.level_range, r.created_at, c.name, ROW_NUMBER() OVER (PARTITION BY c.id ORDER BY r.created_at DESC) AS rn FROM tests t JOIN review_data r ON t.id = r.test_id JOIN categories c ON t.category_id = c.id WHERE t.user_id = %s) AS ranked WHERE rn <= 5 ORDER BY name, created_at DESC;", (session["user_id"],))
             results = cur.fetchall()
@@ -79,10 +85,10 @@ def index():
             for row in results:
                 category = row["name"]
                 
-                # Formatear fecha: "January 15, 2025"
-                date_str = row["created_at"].strftime("%B %d, %Y")  # Nota: %B da el mes en inglés
+                # Give format: "Month day, year"
+                date_str = row["created_at"].strftime("%B %d, %Y")
                 
-                # Formatear rango: [1, 3] → "1-3"
+                # Obtain level range
                 range_str = f"{row['level_range'][0]}-{row['level_range'][1]}"
                 
                 test_entry = {
@@ -260,6 +266,8 @@ def register():
 
 @app.route("/skip", methods=["POST"])
 def skip():
+    print("executing skip")
+
     # Update beliefs based on failure (skip)
     session["beliefs"] = update_beliefs(False, session["question"]["level"], session["beliefs"])
     session["question"]["user_answer"] = ""
@@ -278,6 +286,7 @@ def skip():
         
 @app.route("/check", methods=["POST"])
 def check():
+    print("executing check")
     if session["question"]["type_name"] == "ma":
         session["question"]["user_answer"] = request.form.getlist("answer")
         result = validate_answer(session["question"]["user_answer"], session["question"]["id"], True)
@@ -317,7 +326,7 @@ def feedback():
     elif request.method == "GET":
         # If accessed illegaly
         if not "test" in session:
-            return render_template("error.html")
+            return render_template("error.html", error_title = "No active test found", error_message = "You accessed this page without selecting a test first. Please go back to the homepage and choose one to begin.")
         if session["test_page"]:
             session["new_question"] = False
             return redirect(url_for("test"))
@@ -368,7 +377,7 @@ def feedback():
 @app.route("/test", methods=["GET"])
 def test():    
     if not "test" in session:
-        return render_template("error.html")
+        return render_template("error.html", error_title = "No active test found", error_message = "You accessed this page without selecting a test first. Please go back to the homepage and choose one to begin.")
     
     if not session["test_page"]:
         return redirect(url_for("feedback"))
@@ -489,7 +498,7 @@ def test_final():
     estimated_level = (session['final_level'].stop + session['final_level'].start) / 2
     summary_text = get_level_summary(estimated_level)
 
-    plot_data = plot_beliefs(session["beliefs"])
+    plot_data = plot_beliefs_svg(session["beliefs"])
 
     extended_min = max(session['final_level'].start - 15, 0)
     extended_max = min(session['final_level'].stop + 15, 100)
@@ -641,24 +650,6 @@ def test_final():
         del session["test"]
     return redirect(url_for("review"))
 
-    
-
-@app.route("/review", methods=["GET"])
-def review():
-    if not "test" in session:
-        return render_template("error.html", error_title = "No active test found", error_message = "You accessed this page without selecting a test first. Please go back to the homepage and choose one to begin.")
-    if not "review" in session or not session["review"]:
-        return render_template("error.html", error_title = "You haven't finished your test yet", error_message = "To see your performance review, you need to complete the test first. Please return and finish the test to unlock your results.")
-    print(session["review"])
-    return render_template("review.html", 
-                           final_level_start = session["final_level"].start,
-                           final_level_stop = session["final_level"].stop,
-                           weaknesses = session["weaknesses"],
-                           strengths = session["strengths"],
-                           summary_text = session["summary_text"],
-                           plot_data = session["plot_data"],
-                           username= session["username"],
-                           )
 
 @app.route("/review/test/<int:test_id>")
 def review_test(test_id):
@@ -676,7 +667,7 @@ def review_test(test_id):
 
     results["beliefs"] = {int(k): v for k, v in results["beliefs"].items()}
 
-    session["plot_data"] = plot_beliefs(results["beliefs"])
+    session["plot_data"] = plot_beliefs_svg(results["beliefs"])
 
     session["review"] = True
     session["test"] = True
@@ -684,6 +675,19 @@ def review_test(test_id):
     return redirect(url_for("review"))
 
 
+@app.route("/review", methods=["GET"])
+def review():
+    if not "review" in session or not session["review"]:
+        return render_template("error.html", error_title = "You haven't finished your test yet", error_message = "To see your performance review, you need to complete the test first.")
+    return render_template("review.html", 
+                           final_level_start = session["final_level"].start,
+                           final_level_stop = session["final_level"].stop,
+                           weaknesses = session["weaknesses"],
+                           strengths = session["strengths"],
+                           summary_text = session["summary_text"],
+                           plot_url = session["plot_data"],
+                           username= session["username"],
+                           )
 
 
 if __name__ == "__main__":

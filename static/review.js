@@ -1,24 +1,41 @@
-function toggleTopic(header) {
-    const topic = header.parentElement;
-    const materials = topic.querySelector('.materials');
-    const isOpen = topic.classList.contains('open');
+function toggleTopic(clickedHeader) {
+    const clickedTopic = clickedHeader.parentElement;
+    const clickedMaterials = clickedTopic.querySelector('.materials');
+    const isOpen = clickedTopic.classList.contains('open');
+
+    // Cerrar todos los demás
+    document.querySelectorAll('.topic').forEach(topic => {
+        const materials = topic.querySelector('.materials');
+
+        if (topic !== clickedTopic && topic.classList.contains('open')) {
+            // Animación de cierre
+            materials.style.height = materials.scrollHeight + 'px';
+            requestAnimationFrame(() => {
+                topic.classList.remove('open');
+                materials.style.height = '0px';
+            });
+        }
+    });
 
     if (isOpen) {
-    materials.style.height = materials.scrollHeight + 'px';
-    requestAnimationFrame(() => {
-        topic.classList.remove('open');
-        materials.style.height = '0px';
-    });
+        // Cerrar el actual
+        clickedMaterials.style.height = clickedMaterials.scrollHeight + 'px';
+        requestAnimationFrame(() => {
+            clickedTopic.classList.remove('open');
+            clickedMaterials.style.height = '0px';
+        });
     } else {
-    topic.classList.add('open');
-    materials.style.height = materials.scrollHeight + 'px';
-    materials.addEventListener('transitionend', () => {
-        if (topic.classList.contains('open')) {
-        materials.style.height = 'auto';
-        }
-    }, { once: true });
+        // Abrir el actual
+        clickedTopic.classList.add('open');
+        clickedMaterials.style.height = clickedMaterials.scrollHeight + 'px';
+        clickedMaterials.addEventListener('transitionend', () => {
+            if (clickedTopic.classList.contains('open')) {
+                clickedMaterials.style.height = 'auto';
+            }
+        }, { once: true });
     }
 }
+
 
 function showDesc(material) {
     const desc = material.querySelector('.material-desc');

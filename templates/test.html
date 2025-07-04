@@ -10,10 +10,9 @@
 {% endblock %}
 
 {% block js %}
-    <!-- app.js link -->
+    <!-- test.js link -->
     <script defer src="{{ url_for('static', filename='test.js') }}"></script>
     <script>
-        console.log("aca no tamo un choto chelo")
         window.MathJax = {
             tex: {
                 inlineMath: [['\\(', '\\)']],
@@ -33,7 +32,7 @@
 {% block main %}
     <nav class="nav">
         <div class="nav-home">
-            <a class="exit-button" href="/">KnowYourMath</a>
+            <a class="exit-button action-btn" onclick="handleClick(this)" href="/">KnowYourMath</a>
         </div>
         <div class="nav-session">
             <a>{{ username }}</a>
@@ -46,7 +45,7 @@
             <h3>Are you sure?</h3>
             <p>This will count as a wrong answer.</p>
             <form method="post" action="/skip">
-                <button type="submit" class="confirm">Yes, skip</button>
+                <button type="submit" class="confirm action-btn" onclick="handleClick(this)">Yes, skip</button>
                 <button type="button" class="cancel" id="cancelSkip">Cancel</button>
             </form>
         </div>
@@ -156,14 +155,12 @@
                   </form>
             {% endif %}
         </div>
-        <p>{{ question.id }}</p>
-        <p>{{ question.level }}</p>
     </section>
     <footer>
         <button id="skipBtn" class="nti button skip">
             Skip
         </button>
-        <button form="answer_form" class="nti button check">
+        <button form="answer_form" class="nti button check action-btn" onclick="handleClick(this)">
             Check
         </button>
     </footer>

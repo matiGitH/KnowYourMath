@@ -89,8 +89,10 @@ section {
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: 100vh;
+  width: 100%;
+  padding: 2rem 1rem;
   border-bottom: 2px solid #eee;
+  box-sizing: border-box;
 }
 
 .review-intro {
@@ -112,6 +114,7 @@ section {
   color: #1c1d1e;
   margin-bottom: 1rem;
   animation: fadeUp 0.8s ease-out forwards;
+  justify-self: center;
 }
 
 .level-range {
@@ -130,6 +133,10 @@ section {
 
 .attributes p {
   width: 50%;
+  text-align: center;
+}
+
+.performance-graph p {
   text-align: center;
 }
 
@@ -244,4 +251,27 @@ section {
   margin-top: 3rem;
   font-size: 1.2rem;
   font-weight: 800;
+}
+
+@media (max-width: 768px) {
+  .review-intro h1 {
+    width: 80%;
+  }
+
+  .review-end p {
+    width: 80%;
+  }
+
+  .attributes p {
+    width: 80%;
+  }
+
+  .svg-container svg{
+    width: 100vw;
+  }
+
+}
+
+.svg-container svg {
+  height: auto;
 }

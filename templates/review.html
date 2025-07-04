@@ -20,7 +20,7 @@
             <a class="exit-button" href="/">KnowYourMath</a>
         </div>
         <div class="nav-session">
-            <a href="">{{ username }}</a>
+            <a>{{ username }}</a>
         </div>
         </div>
     </nav>
@@ -35,7 +35,9 @@
     <section class="performance-graph">
         <h1>Overall performance</h1>
         <p>This is just a curiosity. Yet, you might find it interesting.</p>
-        <img src="data:image/png;base64,{{ plot_data }}">
+        <div class="svg-container">
+            {{ plot_url | safe }}
+        </div>
     </section>
     <section class="attributes weaknesses">
         <h1>Weaknesses</h1>

@@ -68,7 +68,12 @@
         </span>
       </div>
       <div id="intro-right">
-        <img src="https://static.vecteezy.com/system/resources/previews/024/724/633/non_2x/a-happy-smiling-young-college-student-with-a-book-in-hand-isolated-on-a-transparent-background-generative-ai-free-png.png">
+        <div class="demo-video-wrapper">
+          <video class="demo-video" autoplay loop muted playsinline preload="auto">
+            <source src="{{ url_for('static', filename='media/demo_vertical.mp4') }}" type="video/mp4">
+            Tu navegador no admite video HTML5.
+          </video>
+        </div>
       </div>
     </div>
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
