@@ -9,19 +9,17 @@ from flask_session import Session
 from dotenv import load_dotenv
 import random as r
 
-from helpers import login_required, connect_db, close_db, binary_entropy_dict, validate_answer, print_beliefs, choose_lvl, update_beliefs, find_breaking_point, choose_level_exploring, get_level_summary, plot_beliefs_svg
-
-CATEGORIES = ["trigonometry","algebra","statistics","calculus"]
+from helpers import connect_db, close_db, validate_answer, choose_lvl, update_beliefs, find_breaking_point, choose_level_exploring, get_level_summary, plot_beliefs_svg
 
 EXPLORING_FACTOR = 3
 
-# Cargar variables de entorno
+# Load env variables
 load_dotenv()
 
-# Configurar la conexión con PostgreSQL en Supabase
+# Configurate connection with supabase db
 DB_URL = os.getenv("SUPABASE_DB_URL_ipv4")  
 
-# Inicializar Flask
+# Initialize Flask
 app = Flask(__name__)
 
 # Configure session to use filesystem (instead of signed cookies)
@@ -40,7 +38,6 @@ def after_request(response):
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    print("ejecutando index")
     if request.method == "GET":
 
         # Clean session
@@ -157,7 +154,7 @@ def login():
 
         # Query database for email
         cur.execute("SELECT id, username FROM users WHERE email = %s", (email,))
-        user = cur.fetchone()  # Obtener resultados
+        user = cur.fetchone()
 
         if user:
             db_id = user["id"]
@@ -180,7 +177,6 @@ def login():
 
     # User reached route via GET (as by clicking a link or via redirect)
     elif request.method == "GET":
-        # Devolver a index al usuario si ya esta logueado
         if "user_id" in session:
             return redirect(url_for("index"))
         return render_template("login.html")
@@ -193,7 +189,7 @@ def logout():
     # Forget any user_id
     session.clear()
 
-    # Redirect user to login form
+    # Redirect user to home
     return redirect(url_for("index"))
     
 
@@ -266,7 +262,6 @@ def register():
 
 @app.route("/skip", methods=["POST"])
 def skip():
-    print("executing skip")
 
     # Update beliefs based on failure (skip)
     session["beliefs"] = update_beliefs(False, session["question"]["level"], session["beliefs"])
@@ -286,7 +281,6 @@ def skip():
         
 @app.route("/check", methods=["POST"])
 def check():
-    print("executing check")
     if session["question"]["type_name"] == "ma":
         session["question"]["user_answer"] = request.form.getlist("answer")
         result = validate_answer(session["question"]["user_answer"], session["question"]["id"], True)
@@ -392,16 +386,11 @@ def test():
             exploring = False
         cur, conn = connect_db()
 
-        # Prints
-        print_beliefs(session["beliefs"])
-        print(binary_entropy_dict(session["beliefs"]))
-
         if not exploring and session["question_num"] != 0:
             # Check if breaking point found
             breaking_point = find_breaking_point(session["beliefs"])
 
             if breaking_point:
-                print(f"breaking point found: {breaking_point}")
                 session["final_level"] = breaking_point
                 session["exploring"] = True
 
@@ -410,7 +399,6 @@ def test():
             user_level = session["final_level"]
             chosen_lvl = choose_level_exploring(user_level, session["used_levels"], EXPLORING_FACTOR)
             # If no more levels available (end of exploring)
-            print(f"EXPLORING: question lvl {chosen_lvl}")
             if not chosen_lvl:
                 # Update test as completed in db
                 cur.execute("UPDATE tests SET completed = %s WHERE user_id = %s AND id = %s;", (True, session["user_id"], session["test_id"],))
@@ -426,8 +414,6 @@ def test():
         
         # Remember used_levels
         session["used_levels"].append(chosen_lvl)
-
-        print(f"chosen lvl = {chosen_lvl}")
 
         # Select random question from chosen level (every needed field)
         cur.execute("SELECT questions.id, questions.level, questions.statement, questions.equation, questions.question, questions.image_url, questions.format_hint, questions.answer_txt, questions.calculator, categories.name AS category_name, question_types.name AS type_name FROM questions JOIN categories ON questions.category_id = categories.id JOIN question_types ON questions.type_id = question_types.id WHERE questions.level = %s AND categories.name = %s ORDER BY RANDOM() LIMIT 1;", (chosen_lvl, session["test"],)) 
@@ -467,7 +453,7 @@ def test():
 
             session["question"]["answers"] = answers
 
-            # Crear el HTML del <select>
+            # Create <select> HTML
             select_html = "<select form='answer_form' name='answer' class='answer-select'>"
             select_html += "<option value='' disabled selected>Select an option</option>"
             for a in answers:
@@ -476,7 +462,7 @@ def test():
                 select_html += f"<option value='{a['answer']}'>{a['answer']}</option>"
             select_html += "</select>"
 
-            # Reemplazar "__" en el statement por el <select>
+            # Replace "__" for <select>
             session["question"]["statement_improved"] = session["question"]["statement"].replace("__", select_html)
 
         close_db(cur, conn)
@@ -585,7 +571,7 @@ def test_final():
             }
 
             if subject_name not in weak_subject_map:
-                # Crear nueva entrada
+                # New subject entry
                 subject_entry = {
                     "subject": subject_name,
                     "materials": [material_info]
@@ -593,7 +579,7 @@ def test_final():
                 final_weak_materials.append(subject_entry)
                 weak_subject_map[subject_name] = subject_entry
             else:
-                # Agregar material a la entrada existente
+                # Append material to existent entry
                 weak_subject_map[subject_name]["materials"].append(material_info)
 
     final_strong_materials = []
@@ -609,7 +595,7 @@ def test_final():
         strong_subject_map = {}
 
         for row in strong_materials:
-            subject_name = row["name"]  # 'name' de la consulta, es el subject
+            subject_name = row["name"]
             material_info = {
                 "title": row["title"],
                 "url": row["url"],
@@ -617,7 +603,7 @@ def test_final():
             }
 
             if subject_name not in strong_subject_map:
-                # Crear nueva entrada
+                # New entry
                 subject_entry = {
                     "subject": subject_name,
                     "materials": [material_info]
@@ -625,7 +611,7 @@ def test_final():
                 final_strong_materials.append(subject_entry)
                 strong_subject_map[subject_name] = subject_entry
             else:
-                # Agregar material a la entrada existente
+                # Append material to existent entry
                 strong_subject_map[subject_name]["materials"].append(material_info)
 
     session["weaknesses"] = final_weak_materials
@@ -644,6 +630,8 @@ def test_final():
     cur.execute("INSERT INTO review_data (test_id, level_range, weaknesses, strengths, beliefs) VALUES (%s, %s, %s, %s, %s)", (session["test_id"], level_range, json_weaknesses, json_strengths, json_beliefs,))
     conn.commit()
 
+    cur.execute("DELETE FROM user_answers WHERE test_id = %s", (session["test_id"],))
+    conn.commit()
     close_db(cur, conn) 
     session["review"] = True
     if "test" in session:

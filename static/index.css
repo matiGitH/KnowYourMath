@@ -6,6 +6,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=League+Spartan:wght@100..900&display=swap');
 /* Patrick Hand, Inter */
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Patrick+Hand&display=swap');
+/* roboto slab */
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100..900&display=swap');
 
 :root {
     --orange: #ff6200;
@@ -13,20 +15,17 @@
     --white: #ffffff;
 }
   
-
-/* Estado inicial */
 .animate-fade-left,
 .animate-fade-in {
   opacity: 0;
-  transform: translateY(20px); /* por defecto, movimiento vertical */
+  transform: translateY(20px);
   transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
 .animate-fade-left {
-  transform: translateX(-60px); /* movimiento horizontal desde la izquierda */
+  transform: translateX(-60px);
 }
 
-/* Clase cuando entra en pantalla */
 .visible {
   opacity: 1;
   transform: translateX(0) translateY(0);
@@ -46,6 +45,7 @@
 
 html {
     scroll-behavior: smooth;
+    overflow-x: hidden;
 }
 
 .hidden {
@@ -106,7 +106,6 @@ html {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    overflow-x: hidden;
 }
 
 body {
@@ -219,16 +218,15 @@ li {
     content: "";
     position: absolute;
     left: 0;
-    bottom: 0; /* ligeramente debajo del texto */
+    bottom: 0;
     width: 0;
     height: 2px;
-    background-color: black; /* O cualquier color del underline */
+    background-color: black;
     transition: width 0.3s ease;
 }
 
 .nav-right a:hover::after {
     width: 100%;
-    /* Se despliega el subrayado */
 }
 
 .intro-left {
@@ -259,32 +257,46 @@ li {
     font-size: 1.5rem;
 }
 
-#intro-right {
-    position: fixed;
-    top: 7vh;
-    right: 13vw;
-    width: 18vw;
-    height: 80vh;
-    border-radius: 40px;
-    overflow: hidden;
-    z-index: 1;
+.intro-right{
+    display: block;
+    position: sticky;
+    top: 13vh;             
+    width:100%;
+    height:80vh;
+    border-radius:40px;
+    overflow:hidden;
+    z-index:1;
+    pointer-events:auto;   
+    border: 6px solid #1c1d1e;
+    background-color: black;
 }
 
-.demo-video-wrapper {
-    width: 100%;
-    align-self: center;
-    max-width: 380px;        /* ajusta al ancho que desees */
-    margin-inline: auto;     /* centra horizontalmente */
-    border-radius: 16px;     /* opcional: esquinas redondeadas */
-    overflow: hidden;        /* evita que el video se salga del borde */
+.intro-right-wrapper{
+    position:absolute;    
+    inset:0 auto 0  auto;   
+    right:13vw;           
+    width:18vw;
+    pointer-events:none; 
+    height: 200vh;
 }
 
-.demo-video {
-    width: 100%;
-    height: auto;            /* mantiene proporción vertical */
-    object-fit: cover;       /* recorta suavemente si hace falta */
+.demo-video-wrapper{
+  width:100%;
+  height:100%;
+  position:relative;
+  overflow:hidden;
 }
 
+.demo-video{
+  position:absolute;
+  top:-15px;                   
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  height:calc(100% + 30px);      
+  object-fit:cover;
+  object-position:center;
+}
 
 .intro-bars {
     position: absolute;
@@ -294,13 +306,12 @@ li {
     z-index: 0;
 }
 
-.wave-intro {
-    display: flex;
-    flex-direction: row;
-    min-height: 100vh;
-    width: 100%;
-    background:#ff6200;
-    position: relative;
+.wave-intro{
+  display:flex;
+  min-height:100vh;             
+  background:#ff6200;
+  position:relative;
+  overflow: visible;
 }
 
 svg {
@@ -493,7 +504,6 @@ svg {
     width: 100%;
     height: 100px;
     margin-bottom: -2px;
-    /* elimina pequeño salto visual */
 }
 
 .separator {
@@ -683,7 +693,7 @@ svg {
 }
 
 .question-text span {
-    font-family: 'Patrick Hand', sans-serif;
+    font-family: "Roboto Slab", serif;
     font-size: 2rem;
 }
 
@@ -757,3 +767,127 @@ footer {
     color: #cc4e00;
 }
 
+/* Mobile design */
+@media (max-width: 768px) {
+    .nav {
+        padding: 0.9rem 0.2rem;
+        width: 100vw;
+        justify-content: space-between;
+    }
+
+    .nav * {
+        font-size: unset;
+    }
+
+    .nav-home {
+        font-size: 0.9rem;
+    }
+
+    .nav-right {
+        position: relative;
+        width: 65%;
+        padding: 0;
+        justify-content: flex-end;
+        gap: 0.8rem;
+        right: 5px
+    }
+
+    .nav-div {
+        height: auto;
+        font-size: 0.7rem;
+    }
+
+    .wave-intro {
+        height: 100vh;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem
+    }
+
+    .intro-left {
+        align-items: center;
+        width: 100vw;
+        position: relative;
+        left: unset;
+    }
+
+    h1.headline {
+        font-size: 2rem;
+        width: 60%;
+
+    }
+
+    #intro-subheadline {
+        font-size: 1.1rem;
+        width: 90%;
+        margin-top: 1rem;
+    }
+
+    .intro-right-wrapper {
+        position: relative;
+        right: unset;
+        width: 45vw;
+    }
+
+    .intro-right {
+        position: relative;
+        height: 50vh;
+    }
+
+    .div-info-tests {
+        width: 100%;
+        align-items: center;
+    }
+
+    .div-info-tests h2 {
+        width: 80vw;
+    }
+
+    .div-info-tests p {
+        width: 90vw;
+    }
+
+    .div-info-tests * {
+        text-align: center;
+    }
+
+    .arrow {
+        left: 50%;
+    }
+
+    .alert-box {
+        width: 80vw;
+    }
+
+    .not-logged-progress {
+        font-size: 1.3rem;
+    }
+
+    .about-me-h1 {
+        font-size: 3rem;
+        padding-top: 1rem;
+    }
+
+    #question-texts {
+        width: 80%;
+    }
+
+    .question-text span {
+        font-size: 1.2rem;
+        text-align: center;
+    }
+
+    .answers-container {
+        margin-top: 2vh;
+        height: 35vh;
+    }
+
+    .answers-box {
+        width: 90%;
+    }
+
+    .answer-text p {
+        font-size: 0.9rem;
+    }
+
+}

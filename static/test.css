@@ -218,7 +218,6 @@ section {
     box-shadow: 0 4px 12px rgba(255, 98, 0, 0.3);
 }
 
-/* Contenedor compartido */
 .option-container {
     display: flex;
     align-items: center;
@@ -235,7 +234,6 @@ section {
     background-color: #f9f9f9;
 }
 
-/* Ocultar inputs originales */
 .option-container input[type="radio"],
 .option-container input[type="checkbox"] {
     display: none;
@@ -270,7 +268,7 @@ section {
     position: relative;
 }
 
-/* Tilde al seleccionar */
+/* Check (when selected) */
 .custom-checkbox::after {
     content: "✓";
     color: white;
@@ -296,12 +294,10 @@ section {
     background-color: #ff6200;
 }
 
-/* Texto respuesta */
 .answer-text {
     font-size: 18px;
 }
 
-/* Imagen respuesta */
 .answer-img {
     max-width: 200px;
     max-height: 150px;
@@ -323,7 +319,6 @@ section {
     transition: all 0.2s ease;
     margin: 0 4px;
     appearance: none;
-    /* Limpia estilos por defecto en algunos navegadores */
     background-image: url("data:image/svg+xml;charset=UTF-8,<svg fill='black' viewBox='0 0 140 140' xmlns='http://www.w3.org/2000/svg'><polygon points='0,0 140,0 70,90'/></svg>");
     background-repeat: no-repeat;
     background-position: right 10px center;
@@ -333,7 +328,6 @@ section {
 .answer-select:focus {
     outline: none;
     border-color: #ff6200;
-    /* Naranja vibrante */
     box-shadow: 0 0 5px rgba(255, 98, 0, 0.4);
 }
 
@@ -494,7 +488,7 @@ section {
     position: relative;
 }
 
-/* Tilde al seleccionar */
+/* Check (when selected) */
 .custom-checkbox-feedback::after {
     content: "✓";
     color: white;

@@ -1,14 +1,14 @@
+// Toggle topics
 function toggleTopic(clickedHeader) {
     const clickedTopic = clickedHeader.parentElement;
     const clickedMaterials = clickedTopic.querySelector('.materials');
     const isOpen = clickedTopic.classList.contains('open');
 
-    // Cerrar todos los demás
     document.querySelectorAll('.topic').forEach(topic => {
         const materials = topic.querySelector('.materials');
 
         if (topic !== clickedTopic && topic.classList.contains('open')) {
-            // Animación de cierre
+            // Closing animation
             materials.style.height = materials.scrollHeight + 'px';
             requestAnimationFrame(() => {
                 topic.classList.remove('open');
@@ -18,14 +18,14 @@ function toggleTopic(clickedHeader) {
     });
 
     if (isOpen) {
-        // Cerrar el actual
+        // Close last material
         clickedMaterials.style.height = clickedMaterials.scrollHeight + 'px';
         requestAnimationFrame(() => {
             clickedTopic.classList.remove('open');
             clickedMaterials.style.height = '0px';
         });
     } else {
-        // Abrir el actual
+        // Open current material
         clickedTopic.classList.add('open');
         clickedMaterials.style.height = clickedMaterials.scrollHeight + 'px';
         clickedMaterials.addEventListener('transitionend', () => {
@@ -40,10 +40,8 @@ function toggleTopic(clickedHeader) {
 function showDesc(material) {
     const desc = material.querySelector('.material-desc');
 
-    // Fase 1: set max-height dinámico
     desc.style.maxHeight = desc.scrollHeight + 'px';
 
-    // Fase 2: luego de un delay, activamos opacidad
     setTimeout(() => {
     desc.style.opacity = '1';
     desc.style.pointerEvents = 'auto';
@@ -53,12 +51,10 @@ function showDesc(material) {
 function hideDesc(material) {
     const desc = material.querySelector('.material-desc');
 
-    // Fase 1: ocultar opacidad
     desc.style.opacity = '0';
     desc.style.pointerEvents = 'none';
 
-    // Fase 2: luego de fade out, colapsamos altura
     setTimeout(() => {
     desc.style.maxHeight = '0';
-    }, 300); // coincidir con transition-duration de opacity
+    }, 300);
 }

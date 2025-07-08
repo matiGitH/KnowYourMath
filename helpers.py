@@ -22,22 +22,6 @@ load_dotenv()
 
 DB_URL = os.getenv("SUPABASE_DB_URL_ipv4")
 
-def login_required(f):
-    """
-    Decorate routes to require login.
-
-    https://flask.palletsprojects.com/en/latest/patterns/viewdecorators/
-    """
-
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if session.get("user_id") is None:
-            return redirect("/login")
-        return f(*args, **kwargs)
-
-    return decorated_function  
-
-
 def connect_db():
     """ Conects to database and returns cur and conn """
     conn = psycopg2.connect(DB_URL)
@@ -72,22 +56,17 @@ def validate_answer(answers, question_id, ma=False):
             return True
         else:
             return False
-
-    
-# def validate_ma(answers, type, question_id):
-#     """ Validates ma answer. Takes 2 parameters: answers (a list that contains the answers), question_id.
-#     Returns TRUE (correct) or FALSE (incorrect) """
-
-#     user_answers = set(answers)  # lista a set
-
-#     cur, conn = connect_db()
-#     cur.execute("SELECT answers.answer FROM answers JOIN questions ON answers.question_id = questions.id WHERE questions.id = %s AND answers.is_correct = TRUE;", (question_id,))
-#     results = cur.fetchall()
-#     close_db(cur, conn)
-
-#     correct_answers = {row["answer"] for row in results}  # dicts a set
-
-#     return user_answers == correct_answers
+        
+def find_uncertain_range(dict):
+    """ Finds and returns range of keys that have a value 0.5 if existing. """
+    for i in dict:
+        if dict[i] == 0.5:
+            for j in dict:
+                try:
+                    if dict[(i+j)] != 0.5:
+                        return range(i, i+j)
+                except:
+                    return range(i, 101)
                 
 def choose_lvl(beliefs, used_levels):
 
@@ -139,10 +118,10 @@ def update_beliefs(correct, question_lvl, beliefs):
 
 def update_answer(correct, value, answered_distance, neighbourhood, accumulated):
     """
-    Arguments:
-    correct (boolean): if answer was correct (True) or not (False)
-    value (float): the value to modify
-    answered_distance: distance from 
+    Args:
+        correct (boolean): if answer was correct (True) or not (False)
+        value (float): the value to modify
+        answered_distance: distance from 
 
     Returns:
     value (float) with the added weight, accumulated weight and neighbourhood weight (positive or negative)
@@ -179,6 +158,15 @@ def update_answer(correct, value, answered_distance, neighbourhood, accumulated)
 
 
 def find_breaking_point(my_dict):
+    """
+    Finds the 'breaking point' in a 100-level test where performance drops sharply.
+    Args:
+        my_dict (dict): beliefs dict.
+    Returns:
+        6-level range: The range where performance drops sharply comparing first and last three numbers.
+        None: if no breaking point found.
+
+    """
     levels = list(my_dict.keys())
 
     # Check first 3
@@ -201,35 +189,17 @@ def find_breaking_point(my_dict):
         if avg_first_3 >= 0.75 and avg_last_3 <= 0.25:
             return range(keys[0], keys[-1])
 
-
-
     return None  # No breaking point detected
 
-def binary_entropy(p):
-    if p == 0 or p == 1:
-        return 0
-    return -p * math.log2(p) - (1 - p) * math.log2(1 - p)
-
-def binary_entropy_dict(dictionary):
-    return sum(binary_entropy(p) for p in dictionary.values())
-
-    
 def print_beliefs(beliefs):
+    """
+    Args:
+        beliefs (dict[int, float]): Maps each level (1-100) to the user's success probability.
+        
+    Does not return anything. Prints the dict row by row.
+    """
     for i in beliefs:
         print(f"{i}: {round(beliefs[i], 2)}")
-
-
-def find_uncertain_range(dict):
-    for i in dict:
-        if dict[i] == 0.5:
-            for j in dict:
-                try:
-                    if dict[(i+j)] != 0.5:
-                        return range(i, i+j)
-                except:
-                    return range(i, 101)
-                
-
 
 def choose_level_exploring(my_range: range, used_levels: list, extension: int):
     """

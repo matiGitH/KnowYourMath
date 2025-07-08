@@ -58,11 +58,9 @@ function handleClick(clickedBtn) {
   const form = formId ? document.getElementById(formId) : clickedBtn.closest("form");
 
   if (form && !form.checkValidity()) {
-    // No hacer nada si el formulario no es válido
     return;
   }
 
-  // Esperar un ciclo para permitir que el navegador procese el submit primero
   setTimeout(() => {
     const buttons = document.querySelectorAll('.action-btn');
     buttons.forEach(btn => {

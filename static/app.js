@@ -22,31 +22,52 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-const panels = document.querySelectorAll('.test-panel');
+// Define variables
+const panels    = document.querySelectorAll('.test-panel');
 const submitBtn = document.getElementById('submitBtn');
-const form = document.querySelector('.tests-select');
-let selected = null;
-
-// Verificación previa
+const form      = document.querySelector('.tests-select');
 const LOGGED_IN = document.getElementById('app').dataset.loggedIn === "true";
 
-document.addEventListener("DOMContentLoaded", () => {
-  const alertBox = document.getElementById("customAlert");
-  const cancelBtn = document.getElementById("cancelAlert");
+let selected = null;
 
-  cancelBtn.addEventListener("click", () => {
-    alertBox.classList.add("hidden");
-  });
+document.addEventListener('DOMContentLoaded', () => {
+  const loginAlert       = document.getElementById('customAlert');
+  const loginCancelBtn   = loginAlert.querySelector('.cancel');
 
+  const unavailableAlert = document.getElementById('unavailableAlert');
+  const unavailableCancelBtn = unavailableAlert.querySelector('.cancel');
+
+  // Close Alert
+  function setAlertHandlers(overlay, cancelButton) {
+    // Cancel button
+    cancelButton.addEventListener('click', () => overlay.classList.add('hidden'));
+    // click elsewhere
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {          // solo si toca el fondo semitransparente
+        overlay.classList.add('hidden');
+      }
+    });
+  }
+
+  setAlertHandlers(loginAlert,       loginCancelBtn);
+  setAlertHandlers(unavailableAlert, unavailableCancelBtn);
+
+  // Show alerts if
   panels.forEach(panel => {
     panel.addEventListener('click', () => {
+      // 1. user not logged
       if (!LOGGED_IN) {
-        alertBox.classList.remove("hidden"); // Mostrar alerta
+        loginAlert.classList.remove('hidden');
         return;
       }
 
-      const test = panel.dataset.title;
+      // 2. unavailable
+      if (panel.dataset.available === 'false') {
+        unavailableAlert.classList.remove('hidden');
+        return;
+      }
 
+      // 3) Remove unselected panel
       if (selected === panel) {
         panel.classList.remove('selected');
         selected = null;
@@ -55,32 +76,33 @@ document.addEventListener("DOMContentLoaded", () => {
         panel.classList.add('selected');
         selected = panel;
       }
-
       submitBtn.classList.toggle('enabled', selected !== null);
     });
   });
 
+  // Prevent empty submission
   form.addEventListener('submit', (e) => {
-    if (!selected) {
+    if (!selected) {             
       e.preventDefault();
       return;
     }
 
-    // Prevent múltiple submits
+    // Prevent more than one submission
     submitBtn.disabled = true;
     submitBtn.classList.add('disabled');
 
-    // Eliminate previous inputs
-    document.querySelectorAll('input[name="tests"]').forEach(input => input.remove());
+    // Clean previous inputs
+    form.querySelectorAll('input[name="tests"]').forEach(i => i.remove());
 
-    // Create hidden input
+    // Create hidden input with selected test
     const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'tests';
+    input.type  = 'hidden';
+    input.name  = 'tests';
     input.value = selected.dataset.title.toLowerCase();
     form.appendChild(input);
   });
 });
+
 
 // Animation on scroll when visible
 document.addEventListener("DOMContentLoaded", () => {
@@ -88,7 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add("visible");
-                observer.unobserve(entry.target); // solo una vez
+                observer.unobserve(entry.target);
             }
         });
     }, {
@@ -131,17 +153,17 @@ function updateVisibleText() {
 
     if (!currentTexts.length) return;
 
-    // Verificamos si ya están visibles
+    // If already visible
     const alreadyVisible = [...currentTexts].every(text => text.classList.contains('visible'));
     if (alreadyVisible) return;
 
-    // Ocultamos todos los textos inmediatamente
+    // Hide texts
     allTexts.forEach(text => text.classList.remove('visible'));
 
-    // Cancelamos cualquier timeout anterior
+    // Cancell previous timeouts
     if (textTimeout) clearTimeout(textTimeout);
 
-    // Mostramos los textos correspondientes con delay
+    // Show texts (with delay)
     textTimeout = setTimeout(() => {
         currentTexts.forEach(text => text.classList.add('visible'));
     }, 300);
@@ -149,12 +171,12 @@ function updateVisibleText() {
 
 
 
-// Observador para detectar cambios de clase en slides (cuando cambia la activa)
+// Observer that detects changes in slides
 const observer = new MutationObserver(() => {
   updateVisibleText();
 });
 
-// Aplicamos el observador a todos los slides
+// Apply observer to each slide
 document.querySelectorAll('.swiper-slide').forEach(slide => {
   observer.observe(slide, { attributes: true, attributeFilter: ['class'] });
 });
@@ -167,7 +189,6 @@ headers.forEach(header => {
     const content = header.nextElementSibling;
     const isOpen = content.classList.contains('open');
 
-    // Cerrar todos
     document.querySelectorAll('.accordion-content').forEach(c => {
       c.style.maxHeight = null;
       c.classList.remove('open');

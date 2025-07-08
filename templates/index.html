@@ -55,6 +55,15 @@
       </form>
     </div>
   </div>
+  <div id="unavailableAlert" class="overlay hidden">
+    <div class="alert-box">
+      <h3>Sorry!</h3>
+      <p>We are still working on this one.</p>
+      <form>
+        <button type="button" class="cancel" id="cancelAlert">Cancel</button>
+      </form>
+    </div>
+  </div>
 
   <section class="intro-section">
     <div class="wave-intro">
@@ -67,12 +76,14 @@
           and showing you exactly what to work on.
         </span>
       </div>
-      <div id="intro-right">
-        <div class="demo-video-wrapper">
-          <video class="demo-video" autoplay loop muted playsinline preload="auto">
-            <source src="{{ url_for('static', filename='media/demo_vertical.mp4') }}" type="video/mp4">
-            Tu navegador no admite video HTML5.
-          </video>
+      <div class="intro-right-wrapper">
+        <div class="intro-right">
+          <div class="demo-video-wrapper">
+            <video class="demo-video" autoplay loop muted playsinline preload="auto">
+              <source src="{{ url_for('static', filename='media/demo_vertical.mp4') }}" type="video/mp4">
+              Tu navegador no admite video HTML5.
+            </video>
+          </div>
         </div>
       </div>
     </div>
@@ -105,28 +116,28 @@
 
   <form class="tests-select" action="{{ url_for('index')}}" method="post">
     <div id="tests" class="test-container">
-      <div class="test-panel" data-title="Trigonometry">
+      <div class="test-panel unavailable" data-title="Trigonometry" data-available="true">
         <div class="vertical-text">Trigonometry</div>
         <div class="panel-info">
           <h2>Trigonometry</h2>
           <p>Study of angles, triangles, and trigonometric functions.</p>
         </div>
       </div>
-      <div class="test-panel" data-title="Statistics">
+      <div class="test-panel unavailable" data-title="Statistics" data-available="false">
         <div class="vertical-text">Statistics</div>
         <div class="panel-info">
           <h2>Statistics</h2>
           <p>Analysis and interpretation of numerical data.</p>
         </div>
       </div>
-      <div class="test-panel" data-title="Algebra">
+      <div class="test-panel unavailable" data-title="Algebra" data-available="false">
         <div class="vertical-text">Algebra</div>
         <div class="panel-info">
           <h2>Algebra</h2>
           <p>Manipulation of symbols and solving equations.</p>
         </div>
       </div>
-      <div class="test-panel" data-title="Calculus">
+      <div class="test-panel unavailable" data-title="Calculus" data-available="false">
         <div class="vertical-text">Calculus</div>
         <div class="panel-info">
           <h2>Calculus</h2>
@@ -138,7 +149,7 @@
       <button class="button" id="submitBtn" type="submit">Confirm</button>
     </div>
   </form>
-      <!-- Separador entre tests y progreso -->
+      <!-- Separator between tests & progress -->
       <div class="separator-div animate-fade-in">
         <svg class="separator" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100">
           <path
@@ -265,11 +276,11 @@
 
       <div class="questions-container">
         <div id="question-texts">
-            <div class="question-text" data-for="what"><span>As in... "What am I looking at?"</span></div>
-            <div class="question-text" data-for="who"><span>As in... "Who's responsible for all this?"</span></div>
-            <div class="question-text" data-for="why"><span>As in... "Why did you create this?"</span></div>
-            <div class="question-text" data-for="future"><span>As in... "What's the next thing you'll do?"</span></div>
-            <div class="question-text" data-for="how"><span>As in... "How did you manage to built it?"</span></div>
+            <div class="question-text" data-for="what"><span>"What am I looking at?"</span></div>
+            <div class="question-text" data-for="who"><span>"Who's responsible for all this?"</span></div>
+            <div class="question-text" data-for="why"><span>"Why did you create this?"</span></div>
+            <div class="question-text" data-for="future"><span>"What's the next thing you'll do?"</span></div>
+            <div class="question-text" data-for="how"><span>"How did you manage to built it?"</span></div>
         </div>
       </div>
       <div class="answers-container">

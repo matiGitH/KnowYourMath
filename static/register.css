@@ -184,3 +184,49 @@ label {
     font-size: 0.95rem;
     left: 3rem;
 }
+
+/* Mobile design */
+@media (max-width: 768px) {
+    .nav {
+        padding: 0.9rem 0.2rem;
+        width: 100vw;
+        justify-content: space-between;
+    }
+
+    .nav * {
+        font-size: unset;
+    }
+
+    .nav-home {
+        font-size: 0.9rem;
+    }
+
+    .nav-right {
+        position: relative;
+        width: 65%;
+        padding: 0;
+        justify-content: flex-end;
+        gap: 0.8rem;
+        right: 5px
+    }
+
+    .nav-div {
+        height: auto;
+        font-size: 0.7rem;
+    }
+
+    section {
+        margin-top: 5rem;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .register-form {
+        width: 75vw;
+    }
+
+    .message-box {
+        width: 75vw;
+        margin-bottom: 2rem;
+    }
+}
