@@ -88,5 +88,5 @@ flask run
 ⚠️ **Important:** Before running the app, you must create a `.env` file in the project root directory. This file should define the environment variable required to connect to the Supabase database.
 Only one variable is required:
 ```
-SUPABASE_DB_URL_ipv4=your_supabase_database_url
+SUPABASE_DB_URL_ipv4=supabase_database_url
 ```
