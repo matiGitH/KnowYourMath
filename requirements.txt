@@ -2,7 +2,7 @@ flask
 flask-session
 supabase
 python-dotenv
-psycopg2
+psycopg2-binary
 requests
 numpy
 matplotlib
