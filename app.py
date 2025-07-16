@@ -2,14 +2,13 @@ import os
 import psycopg2
 import re
 import json
-import random
 from datetime import datetime, date
 from flask import Flask, render_template, redirect, session, request, url_for
 from flask_session import Session
 from dotenv import load_dotenv
 import random as r
 
-from helpers import connect_db, close_db, validate_answer, print_beliefs, choose_lvl, update_beliefs, find_breaking_point, choose_level_exploring, get_level_summary, plot_beliefs_svg
+from helpers import connect_db, close_db, validate_answer, choose_lvl, update_beliefs, find_breaking_point, choose_level_exploring, get_level_summary, plot_beliefs_svg
 
 EXPLORING_FACTOR = 3
 
@@ -382,7 +381,6 @@ def test():
                 session["exploring"] = True
         # CHOOSE QUESTION
         if exploring == True:
-            print("explorando")
             user_level = session["final_level"]
             chosen_lvl = choose_level_exploring(user_level, session["used_levels"], EXPLORING_FACTOR)
             # If no more levels available (end of exploring)
@@ -408,11 +406,6 @@ def test():
         # Select random question from chosen level (every needed field)
         cur.execute("SELECT questions.id, questions.level, questions.statement, questions.equation, questions.question, questions.image_url, questions.format_hint, questions.answer_txt, questions.calculator, categories.name AS category_name, question_types.name AS type_name FROM questions JOIN categories ON questions.category_id = categories.id JOIN question_types ON questions.type_id = question_types.id WHERE questions.level = %s AND categories.name = %s ORDER BY RANDOM() LIMIT 1;", (chosen_lvl, session["test"],)) 
         session["question"] = cur.fetchone()
-
-        print_beliefs(session["beliefs"])
-        print(f"id: {session['question']['id']}")
-        print(f"level: {session['question']['level']}")
-        
 
         # Update needed fields for selected type question
         if session["question"]["type_name"] == "nti":

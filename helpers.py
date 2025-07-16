@@ -2,10 +2,8 @@ import os
 import psycopg2
 import random
 import math
-import statistics
 import numpy as np
 import io
-import base64
 import matplotlib
 matplotlib.use('Agg') # Prevent matplotlib from using Tkinter
 import matplotlib.pyplot as plt
@@ -178,7 +176,6 @@ def find_breaking_point(my_dict):
     for i in range(100, 94, -1):
         average = np.mean([my_dict[i], my_dict[i-1]])
         if average >= 0.8:
-            print(f"0.8 <= mean({my_dict[i]}, {my_dict[i-1]})")
             return range(95, 100)
     
     # Check all middle levels
