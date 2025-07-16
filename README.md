@@ -83,4 +83,10 @@ git clone https://github.com/matiGitH/mathtest_repo.git
 cd mathtest_repo
 pip install -r requirements.txt
 flask run
-
+```
+---
+⚠️ **Important:** Before running the app, you must create a `.env` file in the project root directory. This file should define the environment variable required to connect to the Supabase database.
+Only one variable is required:
+```
+SUPABASE_DB_URL_ipv4=your_supabase_database_url
+```
