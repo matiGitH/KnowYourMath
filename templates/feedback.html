@@ -6,13 +6,13 @@
 
 {% block css %}
     <!-- styles.css link -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='test.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/test.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 {% endblock %}
 
 {% block js %}
     <!-- test.js link -->
-    <script defer src="{{ url_for('static', filename='feedback.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='js/feedback.js') }}"></script>
     <script>
         window.MathJax = {
             tex: {

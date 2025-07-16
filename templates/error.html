@@ -59,6 +59,6 @@
   <h1 class="error-code">Oops!</h1>
   <div class="error-message">{{ error_title }}</div>
   <p class="error-description">{{ error_message }}</p>
-  <a href="/" class="home-button">Back to Homepage</a>
+  <a href="{{ button_href | safe }}" class="home-button">{{ button_message }}</a>
 </body>
 </html>

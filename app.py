@@ -9,14 +9,14 @@ from flask_session import Session
 from dotenv import load_dotenv
 import random as r
 
-from helpers import connect_db, close_db, validate_answer, choose_lvl, update_beliefs, find_breaking_point, choose_level_exploring, get_level_summary, plot_beliefs_svg
+from helpers import connect_db, close_db, validate_answer, print_beliefs, choose_lvl, update_beliefs, find_breaking_point, choose_level_exploring, get_level_summary, plot_beliefs_svg
 
 EXPLORING_FACTOR = 3
 
 # Load env variables
 load_dotenv()
 
-# Configurate connection with supabase db
+# Configure connection with supabase db
 DB_URL = os.getenv("SUPABASE_DB_URL_ipv4")  
 
 # Initialize Flask
@@ -41,24 +41,14 @@ def index():
     if request.method == "GET":
 
         # Clean session
-        if "test" in session:
-            del session["test"]
-        if "question" in session:
-            del session["question"]
-        if "tests" in session:
-            del session["test"]
-        if "question_num" in session:
-            del session["question_num"]
-        if "used_levels" in session:
-            del session["used_levels"]
-        if "test_id" in session:
-            del session["test_id"]
-        if "final_level" in session:
-            del session["final_level"]
-        if "beliefs" in session:
-            del session["beliefs"]
-        if "review" in session:
-            del session["review"]
+        if "user_id" in session:
+            user_id = session["user_id"]
+            username = session["username"]
+            session.clear()
+            session["user_id"] = user_id
+            session["username"] = username
+        else:
+            session.clear()
 
         # Clean timeout TESTS
         cur, conn = connect_db()
@@ -247,7 +237,6 @@ def register():
 
             session["username"] = username
 
-            # Close connection
             close_db(cur, conn)
 
             # Remember which user has logged in
@@ -320,7 +309,7 @@ def feedback():
     elif request.method == "GET":
         # If accessed illegaly
         if not "test" in session:
-            return render_template("error.html", error_title = "No active test found", error_message = "You accessed this page without selecting a test first. Please go back to the homepage and choose one to begin.")
+            return render_template("error.html", error_title = "No active test found", error_message = "You accessed this page without selecting a test first. Please go back to the homepage and choose one to begin.", button_message="Back to Homepage", button_href = "/")
         if session["test_page"]:
             session["new_question"] = False
             return redirect(url_for("test"))
@@ -371,14 +360,12 @@ def feedback():
 @app.route("/test", methods=["GET"])
 def test():    
     if not "test" in session:
-        return render_template("error.html", error_title = "No active test found", error_message = "You accessed this page without selecting a test first. Please go back to the homepage and choose one to begin.")
-    
+        return render_template("error.html", error_title = "No active test found", error_message = "You accessed this page without selecting a test first. Please go back to the homepage and choose one to begin.", button_message="Back to Homepage", button_href = "/")
     if not session["test_page"]:
         return redirect(url_for("feedback"))
-
     if session["new_question"]:
         session["new_question"] = False
-
+        
         # Set exploring to False if question number 0
         try:
             exploring = session["exploring"]
@@ -393,9 +380,9 @@ def test():
             if breaking_point:
                 session["final_level"] = breaking_point
                 session["exploring"] = True
-
         # CHOOSE QUESTION
         if exploring == True:
+            print("explorando")
             user_level = session["final_level"]
             chosen_lvl = choose_level_exploring(user_level, session["used_levels"], EXPLORING_FACTOR)
             # If no more levels available (end of exploring)
@@ -407,6 +394,10 @@ def test():
                 close_db(cur, conn)
                 return redirect(url_for("test_final"))
         else:
+            if session["question_num"] >= 20:
+                if "test" in session:
+                    del session["test"]
+                return render_template("error.html", error_title = "We could not figure out your level!", error_message = "Please, go back to our Homepage and try again.", button_message="Back to Homepage", button_href = "/")
             # Choose question
             chosen_lvl = choose_lvl(session["beliefs"], session["used_levels"])
 
@@ -414,16 +405,17 @@ def test():
         
         # Remember used_levels
         session["used_levels"].append(chosen_lvl)
-
         # Select random question from chosen level (every needed field)
         cur.execute("SELECT questions.id, questions.level, questions.statement, questions.equation, questions.question, questions.image_url, questions.format_hint, questions.answer_txt, questions.calculator, categories.name AS category_name, question_types.name AS type_name FROM questions JOIN categories ON questions.category_id = categories.id JOIN question_types ON questions.type_id = question_types.id WHERE questions.level = %s AND categories.name = %s ORDER BY RANDOM() LIMIT 1;", (chosen_lvl, session["test"],)) 
-
-
         session["question"] = cur.fetchone()
+
+        print_beliefs(session["beliefs"])
+        print(f"id: {session['question']['id']}")
+        print(f"level: {session['question']['level']}")
         
+
         # Update needed fields for selected type question
         if session["question"]["type_name"] == "nti":
-
             session["question"]["answer_txt_nti"] = session["question"]["answer_txt"].replace("__", "<input form='answer_form' type='text' name='answer' class='answer-input' maxlength='15' autocomplete='off' required>")
             cur.execute("SELECT answer FROM answers WHERE question_id = %s", (session["question"]["id"],))
             correct_answer = cur.fetchone()
@@ -666,7 +658,7 @@ def review_test(test_id):
 @app.route("/review", methods=["GET"])
 def review():
     if not "review" in session or not session["review"]:
-        return render_template("error.html", error_title = "You haven't finished your test yet", error_message = "To see your performance review, you need to complete the test first.")
+        return render_template("error.html", error_title = "You haven't finished your test yet", error_message = "To see your performance review, you need to complete the test first.", button_message="Resume your test", button_href = "/test")
     return render_template("review.html", 
                            final_level_start = session["final_level"].start,
                            final_level_stop = session["final_level"].stop,

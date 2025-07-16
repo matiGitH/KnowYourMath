@@ -8,11 +8,11 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
   {% block css %}
     <!-- styles.css link -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
   {% endblock %}
   {% block js %}
     <!-- app.js link -->
-    <script defer src="{{ url_for('static', filename='app.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='js/app.js') }}"></script>
   {% endblock %}
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <title>KnowYourMath {% block title %}{% endblock %}</title>
@@ -280,27 +280,46 @@
             <div class="question-text" data-for="who"><span>"Who's responsible for all this?"</span></div>
             <div class="question-text" data-for="why"><span>"Why did you create this?"</span></div>
             <div class="question-text" data-for="future"><span>"What's the next thing you'll do?"</span></div>
-            <div class="question-text" data-for="how"><span>"How did you manage to built it?"</span></div>
+            <div class="question-text" data-for="how"><span>"How did you manage to build it?"</span></div>
         </div>
       </div>
       <div class="answers-container">
         <div class="answers-box">
-          <div class="question-text answer-text" data-for="what"> <p>This is the learning assistant I wish I had at first, when I
-            was learning math but didn't know where to find free and useful material for my level. It is ideal for anyone who'd
-            like to expand its horizonts and doesn't know where to start.</p> </div>
-          <div class="question-text answer-text" data-for="who"> <p>I am just an 18-years-old data science student who has recently finished <a target="_blank" href="https://pll.harvard.edu/course/cs50-introduction-computer-science">cs50</a> and wants to do something useful for his community, but if you want to know more about me, you can visit my <a href="www.linkedin.com/in/matias-garcea-8b3999296">LinkedIn profile</a> and see what I'm up to, or my <a href="https://www.instagram.com/mati_garcea510/">social media</a> where I post cool piano videos for a more personal view! </p> </div>
-          <div class="question-text answer-text" data-for="why"> <p>That's a question I really had to ask myself before starting
-            this project. On the one hand, I knew I had to built some final project in order to complete the <a href="https://pll.harvard.edu/course/cs50-introduction-computer-science">cs50</a>. However,
-            I knew I could pick something short and fit to my skills and knowledge, but, after some creative work, I fell in
-            love with the idea of a challenging, original and helpful project. I knew it'd take long, but I also knew it would
-            teach me a ton and it would be something I can be proud of. And here it is!</p> </div>
-          <div class="question-text answer-text" data-for="future"> <p>At the moment, I somehow can't answer at all this question. I
-            am seriously considering taking the <a href="https://www.geeksforgeeks.org/courses/data-science-live">Geeks for Geeks data science course</a> as my first formal data science course,
-            but I'm definitely open to any kind of opportunities.</p> </div>
-          <div class="question-text answer-text" data-for="how"> <p>With loads of patience, trial and error. That would definitely
-            be my short answer. I had to discover and learn tons of new tools I hadn't even heard of. Most will come handy for
-            me in the near future, and some I will never see again, the only thing that remains constant is the attitude and the
-            eagerness neccesary to accomplish great things.</p> </div>
+          <div class="question-text answer-text" data-for="what">
+            <p>This is the learning assistant I wish I had at first, when I
+              was learning math but didn't know where to find free and useful material for my level. It is ideal for anyone
+              who'd
+              like to expand its horizonts and doesn't know where to start.</p>
+          </div>
+          <div class="question-text answer-text" data-for="who">
+            <p>I am just an 18-years-old data science student who is currently finishing <a target="_blank"
+                href="https://pll.harvard.edu/course/cs50-introduction-computer-science">CS50</a> and wants to do something
+              useful for his community, but if you want to know more about me, you can visit my <a
+                href="https://www.linkedin.com/in/matias-garcea" target="_blank">LinkedIn profile</a> and see what I'm up to, or my <a
+                href="https://www.instagram.com/mati_garcea510/" target="_blank">social media</a> where I post cool piano videos for a more
+              personal view! </p>
+          </div>
+          <div class="question-text answer-text" data-for="why">
+            <p>That was a question I really had to ask myself before starting
+              this project. On the one hand, I knew I had to build a final project to complete the <a
+                href="https://pll.harvard.edu/course/cs50-introduction-computer-science" target="_blank">CS50</a>. But I also
+                knew I had two options: pick a simple idea that matched my current skills and knowledge, or aim for a
+                something more challenging, original and useful. I knew it would take a lot of time, but I also knew it would
+              teach me a ton -and it would be something I could truly be proud of. And here it is!</p>
+          </div>
+          <div class="question-text answer-text" data-for="future">
+            <p>I am currently starting a Data Science course at UBA (Universidad de Buenos Aires), which will be my first
+              formal education on the field. I'm really excited to dive into these completely new subjects. At the same time,
+              I plan to keep working on this project — and on many other ideas I've been thinking about!!
+            </p>
+          </div>
+          <div class="question-text answer-text" data-for="how">
+            <p>With lots of patience, and plenty of trial and error. I had to discover and learn many new tools I hadn't
+              even heard of before. Across this project, I ran into countless problems that seemed <i>imposible</i> to 
+              solve — and the only advice I can give is: just keep trying. No one has ever succeded without first failing
+              a hundred times. If you'd like to know more, feel free to check my LinkedIn, where I'll be sharing more 
+              in-depth insights about the project!</p>
+          </div>
         </div>
       </div>
       

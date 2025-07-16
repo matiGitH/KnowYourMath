@@ -44,10 +44,10 @@ def validate_answer(answers, question_id, ma=False):
     """
     cur, conn = connect_db()
     if ma:
-        user_answers = set(answers)  # lista a set
+        user_answers = set(answers)
         cur.execute("SELECT answers.answer FROM answers JOIN questions ON answers.question_id = questions.id WHERE questions.id = %s AND answers.is_correct = TRUE;", (question_id,))
         results = cur.fetchall()
-        correct_answers = {row["answer"] for row in results}  # dicts a set
+        correct_answers = {row["answer"] for row in results}
         return user_answers == correct_answers
     else:
         cur.execute("SELECT answers.answer FROM answers JOIN questions ON answers.question_id = questions.id WHERE questions.id = %s AND answers.is_correct = TRUE;", (question_id,))
@@ -73,20 +73,20 @@ def choose_lvl(beliefs, used_levels):
     alpha = 200
     beta = 200
 
-    while True:
-        # Generamos un número aleatorio siguiendo la distribución Beta.
-        random_beta_num = random.betavariate(alpha, beta)
 
-        # Buscamos la key en el diccionario cuyo valor asociado esté más cerca
-        # del número generado por Beta.
-        chosen_lvl = min(beliefs, key=lambda key: abs(beliefs[key] - random_beta_num))
+    # Generate a random number following the Beta distribution (close to 0.5).
+    random_beta_num = random.betavariate(alpha, beta)
 
-        # randomizar seleccion de key si value es 0.5
-        if beliefs[chosen_lvl] == 0.5:
-            chosen_lvl = random.choice(find_uncertain_range(beliefs))
-        
-        if chosen_lvl and chosen_lvl not in used_levels and 0 != beliefs[chosen_lvl] != 1:
-            break
+    # New dict with only available levels
+    available_beliefs = {k: v for k, v in beliefs.items() if k not in used_levels and 0 != v != 1}
+
+
+    # Select the key which has the closest value to our random generated number
+    chosen_lvl = min(available_beliefs, key=lambda key: abs(beliefs[key] - random_beta_num))
+
+    # randomize key selection if value is 0.5
+    if available_beliefs[chosen_lvl] == 0.5:
+        chosen_lvl = random.choice(find_uncertain_range(available_beliefs))
 
     return chosen_lvl
 
@@ -177,7 +177,9 @@ def find_breaking_point(my_dict):
     # Check last 5
     for i in range(100, 94, -1):
         average = np.mean([my_dict[i], my_dict[i-1]])
-        if average >= 0.75: return range(95, 100)
+        if average >= 0.8:
+            print(f"0.8 <= mean({my_dict[i]}, {my_dict[i-1]})")
+            return range(95, 100)
     
     # Check all middle levels
     for i in range(len(levels) - 5):
@@ -209,7 +211,7 @@ def choose_level_exploring(my_range: range, used_levels: list, extension: int):
     extension: how much to extend the user's level range to look for questions
     """
     start = my_range.start
-    end = my_range.stop - 1  # El último número incluido en el rango original
+    end = my_range.stop - 1
 
     new_start = max(1, start - extension)
     new_end = min(100, end + extension)
@@ -224,8 +226,6 @@ def choose_level_exploring(my_range: range, used_levels: list, extension: int):
 
     if not available_levels:
         return False
-    print("AVAILABLE LEVELS")
-    print(available_levels)
     return random.choice(list(available_levels))
 
 LEVEL_SUMMARIES = {
@@ -249,7 +249,6 @@ def get_level_summary(level):
         return LEVEL_SUMMARIES["81-100"]
 
 def plot_beliefs_svg(beliefs_dict):
-    # Crear figura
     fig, ax = plt.subplots(figsize=(5, 4))
     levels = list(beliefs_dict.keys())
     probs = list(beliefs_dict.values())
@@ -261,13 +260,13 @@ def plot_beliefs_svg(beliefs_dict):
     ax.grid(True)
     ax.set_ylim(0, 1)
 
-    # Guardar como SVG en memoria
+    # Save plot as SVG
     img = io.BytesIO()
     plt.savefig(img, format='svg')
     plt.close(fig)
     img.seek(0)
 
-    # Devolver el SVG como string
+    # return SVG as string
     return img.getvalue().decode('utf-8')
 
 
