@@ -64,7 +64,7 @@ One of the main limitations of the current algorithm is its difficulty in handli
 
 ### Level-estimation logic
 
-In addition, the level detection logic is not as sophisticated as necessary. It relies on identifying a steep performance drop between two groups of levels -expecting an 80% to 20% accuracy shift across a 6-level window. While this works in many cases, it doesn’t always reflect how people actually perform, especially if their knowledge on different topics varies considerably.
+In addition, the level detection logic is not as sophisticated as necessary. It relies on identifying a step performance drop between two groups of levels -expecting an 80% to 20% accuracy shift across a 6-level window. While this works in many cases, it doesn’t always reflect how people actually perform, especially if their knowledge on different topics varies considerably.
 
 ### question's level accuracy
 
